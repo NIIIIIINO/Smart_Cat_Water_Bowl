@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "smart_cat_water_bowl",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "smart_cat_water_bowl (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "smart_cat_water_bowl (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+    // ใช้เพื่อรันปกติเมื่อกด F5
+            "name": "Flutter (Web Server)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "web-server", // <-- ตรงนี้คือการระบุให้ใช้ Web Server
+                "--web-port",
+                "8080"
+            ]
+        }
+    ]
+}
