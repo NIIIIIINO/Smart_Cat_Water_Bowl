@@ -19,7 +19,7 @@ class StartPage extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Lobster',
                 fontSize: 35,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Color(0xFF5C4033),
               ),
             ),
