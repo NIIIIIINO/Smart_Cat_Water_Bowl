@@ -13,9 +13,14 @@ class StartPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/images/logo.png', width: 140),
+            const SizedBox(height: 11),
             const Text(
               'Meow Flow',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF5C4033),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -26,11 +31,11 @@ class StartPage extends StatelessWidget {
                 backgroundColor: const Color(0xFFB1CCBB),
                 foregroundColor: const Color(0xFF5C4033),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
+                  horizontal: 35,
                   vertical: 11,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // โค้งมน
+                  borderRadius: BorderRadius.circular(8), // โค้งมน
                 ),
               ),
               child: const Text(
