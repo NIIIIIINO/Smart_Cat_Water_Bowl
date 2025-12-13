@@ -22,7 +22,7 @@ class StartPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/');
               },
-              child: const Text('Get Started'),
+              child: const Text('START'),
             ),
           ],
         ),
