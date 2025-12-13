@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/start_page.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/home_page.dart';
@@ -15,10 +16,41 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Cat App',
-      theme: ThemeData(useMaterial3: true),
-      initialRoute: '/',
+      title: 'Smart Cat Water Bowl',
+
+      // ===== Theme ทั้งแอป =====
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFFAF3DD),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFFAF3DD),
+          foregroundColor: Colors.black,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+
+          titleTextStyle: TextStyle(
+            fontFamily: 'Lobster',
+            fontSize: 26,
+            fontWeight: FontWeight.w400,
+            color: Colors.black,
+            letterSpacing: 1.2,
+          ),
+        ),
+
+        // ปุ่มหลัก
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6C9A8B),
+            foregroundColor: Colors.white,
+            shape: StadiumBorder(),
+          ),
+        ),
+      ),
+
+      // ===== Routing =====
+      initialRoute: '/start',
       routes: {
+        '/start': (context) => const StartPage(),
         '/': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const HomePage(),
