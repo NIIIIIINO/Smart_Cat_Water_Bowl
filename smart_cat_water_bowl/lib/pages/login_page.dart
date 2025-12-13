@@ -55,7 +55,7 @@ class LoginPage extends StatelessWidget {
       body: Column(
         children: [
           // 🔹 ระยะก่อนเริ่มแถบขาว
-          SizedBox(height: MediaQuery.of(context).size.height * 0.10),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
           // 🔹 แถบขาว
           Expanded(
