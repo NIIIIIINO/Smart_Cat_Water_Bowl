@@ -32,7 +32,7 @@ class WelComePage extends StatelessWidget {
               const SizedBox(height: 30),
 
               SizedBox(
-                width: double.infinity,
+                width: 230,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushReplacementNamed(context, '/'),
@@ -40,9 +40,12 @@ class WelComePage extends StatelessWidget {
                     backgroundColor: const Color(0xFFBFD5C9),
                     foregroundColor: const Color(0xFF5C4033),
                     elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 11,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Color(0xFF5C4033)),
+                      borderRadius: BorderRadius.circular(8), // โค้งมน
                     ),
                     textStyle: const TextStyle(
                       fontSize: 20,
@@ -58,7 +61,7 @@ class WelComePage extends StatelessWidget {
               const SizedBox(height: 14),
 
               SizedBox(
-                width: double.infinity,
+                width: 230,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () =>
@@ -67,14 +70,17 @@ class WelComePage extends StatelessWidget {
                     backgroundColor: const Color(0xFFBFD5C9),
                     foregroundColor: const Color(0xFF5C4033),
                     elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 11,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Color(0xFF5C4033)),
+                      borderRadius: BorderRadius.circular(8), // โค้งมน
                     ),
                     textStyle: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
                       fontFamily: 'MontserratAlternates',
-                      fontWeight: FontWeight.w600, // SemiBold 600
-                      fontSize: 16,
                       letterSpacing: 1.2,
                     ),
                   ),
