@@ -26,7 +26,7 @@ class StartPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/');
+                Navigator.pushReplacementNamed(context, '/welcome');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFB1CCBB),
@@ -43,7 +43,7 @@ class StartPage extends StatelessWidget {
                 'START',
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'MontserratAlternates',
                 ),
               ),
