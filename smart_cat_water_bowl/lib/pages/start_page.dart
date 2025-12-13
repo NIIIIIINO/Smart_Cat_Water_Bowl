@@ -41,7 +41,11 @@ class StartPage extends StatelessWidget {
               ),
               child: const Text(
                 'START',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'MontserratAlternates',
+                ),
               ),
             ),
           ],
