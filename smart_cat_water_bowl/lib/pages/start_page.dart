@@ -18,7 +18,7 @@ class StartPage extends StatelessWidget {
               'Meow Flow',
               style: TextStyle(
                 fontFamily: 'Lobster',
-                fontSize: 35,
+                fontSize: 37,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF5C4033),
               ),
