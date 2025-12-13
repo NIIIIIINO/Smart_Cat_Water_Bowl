@@ -22,7 +22,21 @@ class StartPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/');
               },
-              child: const Text('START'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB1CCBB),
+                foregroundColor: const Color(0xFF5C4033),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 11,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // โค้งมน
+                ),
+              ),
+              child: const Text(
+                'START',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
             ),
           ],
         ),
