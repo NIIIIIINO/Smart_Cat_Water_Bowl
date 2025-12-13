@@ -7,14 +7,35 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        toolbarHeight: 220, // 👈 เพิ่มความสูง AppBar
 
-        // 👈 คุมปุ่มย้อนกลับเอง
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/welcome');
           },
+        ),
+
+        centerTitle: true, // 👈 จัดให้อยู่กลาง
+
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 80, // ปรับขนาดโลโก้ใน AppBar
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Meow Flow',
+              style: TextStyle(
+                fontFamily: 'Lobster',
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF5C4033),
+              ),
+            ),
+          ],
         ),
       ),
 
