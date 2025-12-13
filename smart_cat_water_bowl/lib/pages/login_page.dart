@@ -6,12 +6,25 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Login'),
+
+        // 👈 คุมปุ่มย้อนกลับเอง
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/welcome');
+          },
+        ),
+      ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const TextField(decoration: InputDecoration(labelText: 'Email')),
+            const TextField(
+              decoration: InputDecoration(labelText: 'Email/Phone'),
+            ),
             const SizedBox(height: 10),
             const TextField(
               decoration: InputDecoration(labelText: 'Password'),
@@ -23,7 +36,8 @@ class LoginPage extends StatelessWidget {
               child: const Text('Login'),
             ),
             TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/register'),
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, '/register'),
               child: const Text('Create an account'),
             ),
           ],
