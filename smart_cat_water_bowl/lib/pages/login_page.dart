@@ -75,8 +75,8 @@ class LoginPage extends StatelessWidget {
                       'Login',
                       style: TextStyle(
                         fontFamily: 'MontserratAlternates',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 27,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF5C4033),
                       ),
                     ),
