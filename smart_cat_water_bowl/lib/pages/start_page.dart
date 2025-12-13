@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class StartPage extends StatelessWidget {
@@ -10,6 +12,7 @@ class StartPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset('assets/images/logo.png', width: 140),
             const Text(
               'Meow Flow',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
