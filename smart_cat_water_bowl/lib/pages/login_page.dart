@@ -15,11 +15,20 @@ class LoginPage extends StatelessWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
 
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+        // 🔹 เปลี่ยนปุ่มย้อนกลับเป็น <<
+        leading: TextButton(
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/welcome');
           },
+          child: const Text(
+            '<<',
+            style: TextStyle(
+              fontFamily: 'MontserratAlternates',
+              fontSize: 25,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF5C4033),
+            ),
+          ),
         ),
 
         centerTitle: true,
@@ -45,10 +54,10 @@ class LoginPage extends StatelessWidget {
       // ================= BODY =================
       body: Column(
         children: [
-          // 🔹 ดันจุดเริ่มต้นของแถบขาวลงมาประมาณครึ่งจอ
+          // 🔹 ระยะก่อนเริ่มแถบขาว
           SizedBox(height: MediaQuery.of(context).size.height * 0.10),
 
-          // 🔹 แถบขาว (เริ่มกลางจอ → ลงสุดล่าง)
+          // 🔹 แถบขาว
           Expanded(
             child: Container(
               width: double.infinity,
@@ -57,7 +66,7 @@ class LoginPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(32), // โค้งเฉพาะด้านบน
+                  top: Radius.circular(32),
                 ),
                 boxShadow: [
                   BoxShadow(
