@@ -145,7 +145,14 @@ class LoginPage extends StatelessWidget {
                             letterSpacing: 1.2,
                           ),
                         ),
-                        child: const Text('LOGIN'),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'MontserratAlternates',
+                          ),
+                        ),
                       ),
                     ),
 
