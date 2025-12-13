@@ -49,7 +49,7 @@ class WelComePage extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'LOG IN',
+                    'Login',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -80,7 +80,7 @@ class WelComePage extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'SING IN',
+                    'Register',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
