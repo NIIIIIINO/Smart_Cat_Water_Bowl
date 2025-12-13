@@ -13,11 +13,12 @@ class StartPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/images/logo.png', width: 140),
-            const SizedBox(height: 11),
+            const SizedBox(height: 7),
             const Text(
               'Meow Flow',
               style: TextStyle(
-                fontSize: 24,
+                fontFamily: 'Lobster',
+                fontSize: 35,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF5C4033),
               ),
@@ -31,7 +32,7 @@ class StartPage extends StatelessWidget {
                 backgroundColor: const Color(0xFFB1CCBB),
                 foregroundColor: const Color(0xFF5C4033),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 35,
+                  horizontal: 40,
                   vertical: 11,
                 ),
                 shape: RoundedRectangleBorder(
@@ -40,7 +41,7 @@ class StartPage extends StatelessWidget {
               ),
               child: const Text(
                 'START',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               ),
             ),
           ],
