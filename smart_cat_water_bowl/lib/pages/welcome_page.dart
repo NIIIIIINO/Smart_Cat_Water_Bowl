@@ -24,7 +24,7 @@ class WelComePage extends StatelessWidget {
                 'MeowFlow',
                 style: TextStyle(
                   fontFamily: 'Lobster',
-                  fontSize: 34,
+                  fontSize: 37,
                   color: Color(0xFF5C4033),
                 ),
               ),
@@ -47,18 +47,19 @@ class WelComePage extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8), // โค้งมน
                     ),
-                    textStyle: const TextStyle(
+                  ),
+                  child: const Text(
+                    'LOG IN',
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'MontserratAlternates',
-                      letterSpacing: 1.2,
                     ),
                   ),
-                  child: const Text('LOG IN'),
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 20),
 
               SizedBox(
                 width: 230,
@@ -77,14 +78,15 @@ class WelComePage extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8), // โค้งมน
                     ),
-                    textStyle: const TextStyle(
+                  ),
+                  child: const Text(
+                    'SING IN',
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'MontserratAlternates',
-                      letterSpacing: 1.2,
                     ),
                   ),
-                  child: const Text('SIGN IN'),
                 ),
               ),
             ],
