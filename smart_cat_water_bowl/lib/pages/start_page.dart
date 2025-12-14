@@ -18,7 +18,7 @@ class StartPage extends StatelessWidget {
               children: [
                 Image.asset('assets/images/logo.png', width: 200),
                 const Positioned(
-                  bottom: -10, // ติดลบได้ เพื่อให้ text ลงมาด้านล่างของรูป
+                  bottom: -15, // ติดลบได้ เพื่อให้ text ลงมาด้านล่างของรูป
                   child: Text(
                     'Meow Flow',
                     style: TextStyle(
@@ -31,7 +31,7 @@ class StartPage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 35),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/welcome');
