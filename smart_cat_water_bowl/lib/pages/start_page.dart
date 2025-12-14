@@ -31,7 +31,7 @@ class StartPage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/welcome');
