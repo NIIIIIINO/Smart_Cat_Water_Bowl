@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                   'Login',
                   style: TextStyle(
                     fontFamily: 'MontserratAlternates',
-                    fontSize: 27,
+                    fontSize: 40,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF5C4033),
                   ),
