@@ -78,14 +78,28 @@ class _LoginPageState extends State<LoginPage> {
                   const Text(
                     'Login',
                     style: TextStyle(
-                      fontFamily: 'MontserratAlternates',
+                      fontFamily: 'Lobster',
                       fontSize: 40,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF5C4033),
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(
+                    height: 10,
+                  ), // ระยะห่างระหว่าง Login และ Welcome Back
+
+                  const Text(
+                    'Welcome Back :)',
+                    style: TextStyle(
+                      fontFamily: 'MontserratAlternates',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF5C4033),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
 
                   // ===== Email / Phone =====
                   TextField(
@@ -167,13 +181,15 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, '/register');
                     },
-                    child: const Text(
-                      'Create an account',
-                      style: TextStyle(
+                    style: TextButton.styleFrom(
+                      textStyle: const TextStyle(
                         fontFamily: 'MontserratAlternates',
-                        color: Color(0xFF5C4033),
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        decoration: TextDecoration.underline,
+                        decorationColor: Color(0xFF5C4033), // สีเส้นใต้
                       ),
                     ),
+                    child: const Text('Create an account'),
                   ),
                 ],
               ),
