@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "490725560666",
+    "project_id": "smart-cat-water-bowl",
+    "storage_bucket": "smart-cat-water-bowl.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490725560666:android:dff44d8dcc73731f2a2363",
+        "android_client_info": {
+          "package_name": "com.example.smart_cat_water_bowl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqesnXLsTdaMhhnMiPDb8wJnB5shltVyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
