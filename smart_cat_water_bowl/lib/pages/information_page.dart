@@ -124,7 +124,7 @@ class _InformationPageState extends State<InformationPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
+              colors: [Color(0xFFF7F6A3), Color(0xFFFFC9E8)],
             ),
           ),
         ),
