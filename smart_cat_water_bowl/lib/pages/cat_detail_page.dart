@@ -14,6 +14,7 @@ class CatDetailPage extends StatelessWidget {
     final images = (data['images'] as List?)?.cast<String>() ?? [];
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text(name)),
       body: ListView(
         padding: const EdgeInsets.all(16),
