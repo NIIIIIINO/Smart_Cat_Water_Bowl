@@ -30,7 +30,11 @@ class HomePage extends StatelessWidget {
         centerTitle: true,
         title: const Text(
           'MeowFlow',
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF5C4033),
+          ),
         ),
       ),
       body: Column(
