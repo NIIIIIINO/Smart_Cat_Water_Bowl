@@ -118,7 +118,18 @@ class _InformationPageState extends State<InformationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('Add Cat Information')),
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
+            ),
+          ),
+        ),
+        title: const Text('Add Cat Information'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
