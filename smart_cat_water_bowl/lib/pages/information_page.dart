@@ -314,24 +314,20 @@ class _InformationPageState extends State<InformationPage> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFFFC9E8)],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70), // 👈 ปรับความสูงตรงนี้
+        child: AppBar(
+          backgroundColor: const Color(0xFFFFC9E8),
+          elevation: 0,
+          centerTitle: true,
+          title: const Text(
+            'Add Cat Information',
+            style: TextStyle(
+              fontFamily: 'Lobster',
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF5C4033),
             ),
-          ),
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Add Cat Information',
-          style: TextStyle(
-            fontFamily: 'Lobster',
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF5C4033),
           ),
         ),
       ),
