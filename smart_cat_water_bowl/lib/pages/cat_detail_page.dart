@@ -15,7 +15,18 @@ class CatDetailPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(name)),
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
+            ),
+          ),
+        ),
+        title: Text(name),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
