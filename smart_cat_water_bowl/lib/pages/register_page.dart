@@ -1,7 +1,73 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _emailC = TextEditingController();
+  final TextEditingController _passwordC = TextEditingController();
+  final TextEditingController _confirmC = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailC.dispose();
+    _passwordC.dispose();
+    _confirmC.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createAccount() async {
+    final email = _emailC.text.trim();
+    final password = _passwordC.text;
+    final confirm = _confirmC.text;
+
+    if (email.isEmpty || password.isEmpty || confirm.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('โปรดกรอกข้อมูลให้ครบ')));
+      return;
+    }
+    if (password != confirm) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('รหัสผ่านไม่ตรงกัน')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final uid = cred.user?.uid;
+      if (uid != null) {
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message ?? 'เกิดข้อผิดพลาด')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('เกิดข้อผิดพลาด')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,21 +85,38 @@ class RegisterPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const TextField(decoration: InputDecoration(labelText: 'Email')),
+            TextField(
+              controller: _emailC,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
             const SizedBox(height: 10),
-            const TextField(
-              decoration: InputDecoration(labelText: 'Password'),
+            TextField(
+              controller: _passwordC,
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             const SizedBox(height: 10),
-            const TextField(
-              decoration: InputDecoration(labelText: 'Confirm Password'),
+            TextField(
+              controller: _confirmC,
+              decoration: const InputDecoration(labelText: 'Confirm Password'),
               obscureText: true,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pushReplacementNamed(context, '/'),
-              child: const Text('Create Account'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _createAccount,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Create Account'),
+              ),
             ),
           ],
         ),

@@ -1,21 +1,69 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailC = TextEditingController();
+  final TextEditingController _passwordC = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailC.dispose();
+    _passwordC.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    final email = _emailC.text.trim();
+    final password = _passwordC.text;
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('โปรดกรอก Email และ Password')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final uid = cred.user?.uid;
+      if (uid != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
+        // สามารถเก็บข้อมูลผู้ใช้จาก `doc.data()` ไว้ใน state หรือส่งต่อไปยังหน้าอื่นตามต้องการ
+      }
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message ?? 'เกิดข้อผิดพลาด')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF3DD),
-
-      // ================= APP BAR =================
       appBar: AppBar(
         toolbarHeight: 220,
         backgroundColor: const Color(0xFFFAF3DD),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-
-        // 🔹 เปลี่ยนปุ่มย้อนกลับเป็น <<
         leading: TextButton(
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/welcome');
@@ -30,9 +78,7 @@ class LoginPage extends StatelessWidget {
             ),
           ),
         ),
-
         centerTitle: true,
-
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -50,19 +96,13 @@ class LoginPage extends StatelessWidget {
           ],
         ),
       ),
-
-      // ================= BODY =================
       body: Column(
         children: [
-          // 🔹 ระยะก่อนเริ่มแถบขาว
           SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-
-          // 🔹 แถบขาว
           Expanded(
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
-
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: const BorderRadius.vertical(
@@ -76,7 +116,6 @@ class LoginPage extends StatelessWidget {
                   ),
                 ],
               ),
-
               child: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -89,11 +128,9 @@ class LoginPage extends StatelessWidget {
                         color: Color(0xFF5C4033),
                       ),
                     ),
-
                     const SizedBox(height: 24),
-
-                    // ===== Email / Phone =====
                     TextField(
+                      controller: _emailC,
                       decoration: InputDecoration(
                         hintText: 'Email / Phone',
                         filled: true,
@@ -104,11 +141,9 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
-                    // ===== Password =====
                     TextField(
+                      controller: _passwordC,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Password',
@@ -120,17 +155,12 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 32),
-
-                    // ===== Login Button =====
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/home');
-                        },
+                        onPressed: _isLoading ? null : _signIn,
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
                           backgroundColor: const Color(0xFF6C9A8B),
@@ -145,20 +175,26 @@ class LoginPage extends StatelessWidget {
                             letterSpacing: 1.2,
                           ),
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'MontserratAlternates',
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'MontserratAlternates',
+                                ),
+                              ),
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
-                    // ===== Register =====
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/register');

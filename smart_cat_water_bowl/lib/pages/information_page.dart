@@ -1,4 +1,10 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class InformationPage extends StatefulWidget {
   const InformationPage({super.key});
@@ -12,7 +18,95 @@ class _InformationPageState extends State<InformationPage> {
   final ageController = TextEditingController();
   final weightController = TextEditingController();
 
-  final List<String> images = []; // TODO: add image picker
+  final List<XFile> _picked = [];
+  bool _isSaving = false;
+
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    ageController.dispose();
+    weightController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImages() async {
+    try {
+      final List<XFile>? imgs = await _picker.pickMultiImage(imageQuality: 80);
+      if (imgs == null) return;
+      setState(() => _picked.addAll(imgs));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ไม่สามารถเลือกรูปได้')));
+    }
+  }
+
+  Future<List<String>> _uploadImages(String catId) async {
+    final List<String> urls = [];
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid ?? 'unknown';
+
+    for (var i = 0; i < _picked.length; i++) {
+      final file = File(_picked[i].path);
+      final ref = FirebaseStorage.instance.ref().child(
+        'cats/$uid/$catId/${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
+      );
+      final task = ref.putFile(file);
+      final snapshot = await task.whenComplete(() {});
+      final url = await snapshot.ref.getDownloadURL();
+      urls.add(url);
+    }
+    return urls;
+  }
+
+  Future<void> _saveCat() async {
+    final name = nameController.text.trim();
+    final age = int.tryParse(ageController.text.trim());
+    final weight = double.tryParse(weightController.text.trim());
+
+    if (name.isEmpty || age == null || weight == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final ownerUid = user?.uid;
+
+      final docRef = FirebaseFirestore.instance.collection('cats').doc();
+      final catId = docRef.id;
+
+      List<String> imageUrls = [];
+      if (_picked.isNotEmpty) {
+        imageUrls = await _uploadImages(catId);
+      }
+
+      await docRef.set({
+        'name': name,
+        'age': age,
+        'weight': weight,
+        'images': imageUrls,
+        'ownerUid': ownerUid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลเรียบร้อย')));
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,19 +134,46 @@ class _InformationPageState extends State<InformationPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Pick multiple images
-              },
-              child: const Text('Upload Images'),
+              onPressed: _pickImages,
+              child: const Text('Pick Images'),
             ),
-            const SizedBox(height: 10),
-            Text('Images selected: ${images.length}'),
+            const SizedBox(height: 12),
+            _picked.isEmpty
+                ? const Text('No images selected')
+                : SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _picked.length,
+                      itemBuilder: (context, idx) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Image.file(
+                            File(_picked[idx].path),
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Save to Firebase
-              },
-              child: const Text('Save'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _saveCat,
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Save'),
+              ),
             ),
           ],
         ),
