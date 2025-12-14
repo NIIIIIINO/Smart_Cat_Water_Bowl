@@ -15,23 +15,22 @@ class InformationPage extends StatefulWidget {
 
 class _InformationPageState extends State<InformationPage> {
   final nameController = TextEditingController();
-  final ageController =
-      TextEditingController(); // ✅ เก็บ ageText เช่น "2 ปี 3 เดือน"
+  final ageController = TextEditingController(); // เก็บ ageText เช่น "2 Y 3 M"
   final weightController = TextEditingController();
 
-  // ✅ dropdown วัน/เดือน/ปี
+  // dropdown วัน/เดือน/ปี
   int? _day;
   int? _month;
   int? _year;
 
-  // ✅ รูปโปรไฟล์ (1 รูป)
+  // รูปโปรไฟล์ (1 รูป)
   XFile? _profileImage;
 
-  // ✅ รูปหลายรูป (แกลเลอรี่แมว)
+  // รูปหลายรูป (แกลเลอรี่แมว)
   final List<XFile> _picked = [];
 
-  // ✅ Gender dropdown
-  String? _gender; // 'Male' | 'Female' | 'Unknown'
+  // Gender
+  String? _gender; // Male | Female | Unknown
 
   bool _isSaving = false;
   final ImagePicker _picker = ImagePicker();
@@ -44,14 +43,14 @@ class _InformationPageState extends State<InformationPage> {
     super.dispose();
   }
 
-  // ✅ helper: จำนวนวันในเดือนนั้น ๆ (รองรับ leap year)
+  // helper: จำนวนวันในเดือนนั้น ๆ (รองรับ leap year)
   int _daysInMonth(int year, int month) {
     final firstDayThisMonth = DateTime(year, month, 1);
     final firstDayNextMonth = DateTime(year, month + 1, 1);
     return firstDayNextMonth.difference(firstDayThisMonth).inDays;
   }
 
-  // ✅ คำนวณอายุแบบ "ปี + เดือน" แล้วใส่ลง ageController อัตโนมัติ
+  // คำนวณอายุแบบ "ปี + เดือน" แล้วใส่ลง ageController อัตโนมัติ
   void _updateAgeFromBirthDate() {
     if (_day == null || _month == null || _year == null) return;
 
@@ -61,7 +60,9 @@ class _InformationPageState extends State<InformationPage> {
     int totalMonths =
         (today.year - birthDate.year) * 12 + (today.month - birthDate.month);
 
+    // ถ้าวันของวันนี้ยังไม่ถึงวันเกิดในเดือนนี้ ให้ลด 1 เดือน
     if (today.day < birthDate.day) totalMonths--;
+
     if (totalMonths < 0) totalMonths = 0;
 
     final years = totalMonths ~/ 12;
@@ -74,7 +75,7 @@ class _InformationPageState extends State<InformationPage> {
     ageController.text = ageText;
   }
 
-  // ✅ ดึง "อายุเป็นปี" (เก็บตัวเลขใน Firestore)
+  // ดึง "อายุเป็นปี" (เก็บตัวเลขใน Firestore)
   int _ageYearsFromBirthDate(DateTime birthDate) {
     final today = DateTime.now();
     int years = today.year - birthDate.year;
@@ -86,7 +87,7 @@ class _InformationPageState extends State<InformationPage> {
     return years;
   }
 
-  // ✅ style ของช่องกรอกให้เหมือนหน้า Login
+  // style ของช่องกรอกให้เหมือนหน้า Login
   InputDecoration _fieldDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
@@ -110,11 +111,8 @@ class _InformationPageState extends State<InformationPage> {
 
       setState(() {
         _profileImage = img;
-
-        // (ออปชัน) ถ้ายังไม่มีรูปใน list ให้ใส่รูปโปรไฟล์เป็นรูปแรก
-        if (_picked.isEmpty) _picked.add(img);
       });
-    } catch (e) {
+    } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('ไม่สามารถเลือกรูปโปรไฟล์ได้')),
       );
@@ -165,7 +163,7 @@ class _InformationPageState extends State<InformationPage> {
       final List<XFile>? imgs = await _picker.pickMultiImage(imageQuality: 80);
       if (imgs == null) return;
       setState(() => _picked.addAll(imgs));
-    } catch (e) {
+    } catch (_) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('ไม่สามารถเลือกรูปได้')));
@@ -174,8 +172,7 @@ class _InformationPageState extends State<InformationPage> {
 
   Future<List<String>> _uploadImages(String catId) async {
     final List<String> urls = [];
-    final user = FirebaseAuth.instance.currentUser;
-    final uid = user?.uid ?? 'unknown';
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
 
     for (var i = 0; i < _picked.length; i++) {
       try {
@@ -183,8 +180,8 @@ class _InformationPageState extends State<InformationPage> {
         final ref = FirebaseStorage.instance.ref().child(
           'cats/$uid/$catId/${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
         );
-        final uploadTask = ref.putFile(file);
-        final snapshot = await uploadTask.whenComplete(() {});
+
+        final snapshot = await ref.putFile(file).whenComplete(() {});
         final url = await snapshot.ref.getDownloadURL();
         urls.add(url);
       } catch (e) {
@@ -197,14 +194,14 @@ class _InformationPageState extends State<InformationPage> {
   Future<String?> _uploadProfileImage(String catId) async {
     if (_profileImage == null) return null;
 
-    final user = FirebaseAuth.instance.currentUser;
-    final uid = user?.uid ?? 'unknown';
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
 
     try {
       final file = File(_profileImage!.path);
       final ref = FirebaseStorage.instance.ref().child(
         'cats/$uid/$catId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
+
       final snapshot = await ref.putFile(file).whenComplete(() {});
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
@@ -224,7 +221,6 @@ class _InformationPageState extends State<InformationPage> {
       return;
     }
 
-    // ✅ เพิ่ม validation gender
     if (_gender == null) {
       ScaffoldMessenger.of(
         context,
@@ -232,23 +228,15 @@ class _InformationPageState extends State<InformationPage> {
       return;
     }
 
-    late final DateTime birthDate;
-    try {
-      birthDate = DateTime(_year!, _month!, _day!);
-    } catch (_) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('วันเดือนปีไม่ถูกต้อง')));
-      return;
-    }
+    final birthDate = DateTime(_year!, _month!, _day!);
 
     _updateAgeFromBirthDate();
     final ageText = ageController.text.trim();
 
     if (name.isEmpty || weight == null || ageText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('กรุณากรอกน้ำหนักแมว')));
       return;
     }
 
@@ -256,8 +244,7 @@ class _InformationPageState extends State<InformationPage> {
 
     setState(() => _isSaving = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      final ownerUid = user?.uid;
+      final ownerUid = FirebaseAuth.instance.currentUser?.uid;
 
       final docRef = FirebaseFirestore.instance.collection('cats').doc();
       final catId = docRef.id;
@@ -271,7 +258,7 @@ class _InformationPageState extends State<InformationPage> {
 
       await docRef.set({
         'name': name,
-        'gender': _gender, // ✅ เพิ่ม gender
+        'gender': _gender,
         'age': ageYears,
         'ageText': ageText,
         'birthDate': Timestamp.fromDate(birthDate),
@@ -301,8 +288,8 @@ class _InformationPageState extends State<InformationPage> {
     final years = List<int>.generate(26, (i) => currentYear - i);
     final months = List<int>.generate(12, (i) => i + 1);
 
-    final int safeYear = _year ?? currentYear;
-    final int safeMonth = _month ?? 1;
+    final safeYear = _year ?? currentYear;
+    final safeMonth = _month ?? 1;
     final maxDay = _daysInMonth(safeYear, safeMonth);
     final days = List<int>.generate(maxDay, (i) => i + 1);
 
@@ -315,9 +302,9 @@ class _InformationPageState extends State<InformationPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70), // 👈 ปรับความสูงตรงนี้
+        preferredSize: const Size.fromHeight(70),
         child: AppBar(
-          backgroundColor: const Color(0xFFFFC9E8),
+          backgroundColor: Color(0xFFFFC9E8), // ✅ AppBar สีขาว
           elevation: 0,
           centerTitle: true,
           title: const Text(
@@ -332,296 +319,305 @@ class _InformationPageState extends State<InformationPage> {
         ),
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: _showPickProfileSheet,
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 55,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 52,
-                            backgroundColor: const Color(0xFFEFEFEF),
-                            backgroundImage: _profileImage != null
-                                ? FileImage(File(_profileImage!.path))
-                                : null,
-                            child: _profileImage == null
-                                ? const Icon(
-                                    Icons.pets,
-                                    size: 42,
-                                    color: Color(0xFF6C9A8B),
-                                  )
-                                : null,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // รูปโปรไฟล์แบบวงกลม (กดแล้วเลือก กล้อง/แกลเลอรี่)
+                GestureDetector(
+                  onTap: _showPickProfileSheet,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.white,
+                        child: CircleAvatar(
+                          radius: 52,
+                          backgroundColor: const Color(0xFFEFEFEF),
+                          backgroundImage: _profileImage != null
+                              ? FileImage(File(_profileImage!.path))
+                              : null,
+                          child: _profileImage == null
+                              ? const Icon(
+                                  Icons.pets,
+                                  size: 42,
+                                  color: Color(0xFF6C9A8B),
+                                )
+                              : null,
+                        ),
+                      ),
+                      Positioned(
+                        right: 2,
+                        bottom: 2,
+                        child: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF6C9A8B),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            size: 18,
+                            color: Colors.white,
                           ),
                         ),
-                        Positioned(
-                          right: 2,
-                          bottom: 2,
-                          child: Container(
-                            padding: const EdgeInsets.all(7),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF6C9A8B),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 17),
+
+                TextField(
+                  controller: nameController,
+                  decoration: _fieldDecoration('Cat Name'),
+                ),
+                const SizedBox(height: 17),
+
+                TextField(
+                  controller: ageController,
+                  readOnly: true,
+                  decoration: _fieldDecoration('Age (Auto: Y/M)'),
+                ),
+                const SizedBox(height: 17),
+
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Birth Date (Day/Month/Year)',
+                    style: TextStyle(
+                      fontFamily: 'MontserratAlternates',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF5C4033),
                     ),
                   ),
-                  const SizedBox(height: 17),
+                ),
+                const SizedBox(height: 8),
 
-                  TextField(
-                    controller: nameController,
-                    decoration: _fieldDecoration('Cat Name'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        isExpanded: true,
+                        value: _day,
+                        decoration: _fieldDecoration('Day'),
+                        items: days
+                            .map(
+                              (d) => DropdownMenuItem(
+                                value: d,
+                                child: Text(d.toString()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _day = v;
+                            _updateAgeFromBirthDate();
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        isExpanded: true,
+                        value: _month,
+                        decoration: _fieldDecoration('Month'),
+                        items: months
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(m.toString()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _month = v;
+                            _updateAgeFromBirthDate();
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        isExpanded: true,
+                        value: _year,
+                        decoration: _fieldDecoration('Year'),
+                        items: years
+                            .map(
+                              (y) => DropdownMenuItem(
+                                value: y,
+                                child: Text(y.toString()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _year = v;
+                            _updateAgeFromBirthDate();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 17),
+
+                // ✅ Gender dropdown (แก้ล้นจอด้วย DropdownMenu)
+                DropdownMenu<String>(
+                  expandedInsets: EdgeInsets.zero,
+                  initialSelection: _gender,
+                  onSelected: (v) => setState(() => _gender = v),
+                  hintText: 'Gender',
+                  dropdownMenuEntries: const [
+                    DropdownMenuEntry(value: 'Male', label: 'Male'),
+                    DropdownMenuEntry(value: 'Female', label: 'Female'),
+                    DropdownMenuEntry(value: 'Unknown', label: 'Unknown'),
+                  ],
+                  inputDecorationTheme: InputDecorationTheme(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(7),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
-                  const SizedBox(height: 17),
+                ),
 
-                  TextField(
-                    controller: ageController,
-                    readOnly: true,
-                    decoration: _fieldDecoration('Age (Auto: Y/M)'),
-                  ),
-                  const SizedBox(height: 17),
+                const SizedBox(height: 17),
 
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Birth Date (Day/Month/Year)',
+                TextField(
+                  controller: weightController,
+                  keyboardType: TextInputType.number,
+                  decoration: _fieldDecoration('Weight (kg)'),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Pick Images (กรอบเขียว โปร่งใส)
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: _pickImages,
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      side: const BorderSide(
+                        color: Color(0xFF6C9A8B),
+                        width: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(17),
+                      ),
+                    ),
+                    child: const Text(
+                      'Pick Images',
                       style: TextStyle(
                         fontFamily: 'MontserratAlternates',
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF5C4033),
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                        color: Color(0xFF6C9A8B),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                ),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<int>(
-                          value: _day,
-                          decoration: _fieldDecoration('Day'),
-                          items: days
-                              .map(
-                                (d) => DropdownMenuItem(
-                                  value: d,
-                                  child: Text(d.toString()),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) {
-                            setState(() {
-                              _day = v;
-                              _updateAgeFromBirthDate();
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: DropdownButtonFormField<int>(
-                          value: _month,
-                          decoration: _fieldDecoration('Month'),
-                          items: months
-                              .map(
-                                (m) => DropdownMenuItem(
-                                  value: m,
-                                  child: Text(m.toString()),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) {
-                            setState(() {
-                              _month = v;
-                              _updateAgeFromBirthDate();
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: DropdownButtonFormField<int>(
-                          value: _year,
-                          decoration: _fieldDecoration('Year'),
-                          items: years
-                              .map(
-                                (y) => DropdownMenuItem(
-                                  value: y,
-                                  child: Text(y.toString()),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) {
-                            setState(() {
-                              _year = v;
-                              _updateAgeFromBirthDate();
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 12),
 
-                  const SizedBox(height: 17),
-
-                  // ✅ Gender dropdown (วาง "บนช่อง weight")
-                  DropdownButtonFormField<String>(
-                    value: _gender,
-                    decoration: _fieldDecoration('Gender'),
-                    items: const [
-                      DropdownMenuItem(value: 'Male', child: Text('Male')),
-                      DropdownMenuItem(value: 'Female', child: Text('Female')),
-                      DropdownMenuItem(
-                        value: 'Unknown',
-                        child: Text('Unknown'),
-                      ),
-                    ],
-                    onChanged: (v) => setState(() => _gender = v),
-                  ),
-
-                  const SizedBox(height: 17),
-
-                  // ===== Weight =====
-                  TextField(
-                    controller: weightController,
-                    keyboardType: TextInputType.number,
-                    decoration: _fieldDecoration('Weight (kg)'),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton(
-                      onPressed: _pickImages,
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.transparent, // ✅ โปร่งใส
-                        side: const BorderSide(
-                          color: Color(0xFF6C9A8B), // ✅ กรอบสีเขียว
-                          width: 2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(17),
-                        ),
-                      ),
-                      child: const Text(
-                        'Pick Images',
-                        style: TextStyle(
-                          fontFamily: 'MontserratAlternates',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          letterSpacing: 1.2,
-                          color: Color(
-                            0xFF6C9A8B,
-                          ), // ✅ ตัวหนังสือสีเขียว (ให้เข้ากับกรอบ)
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _picked.isEmpty
-                      ? const Text('No images selected')
-                      : SizedBox(
-                          height: 110,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _picked.length,
-                            itemBuilder: (context, idx) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(
-                                        File(_picked[idx].path),
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
+                _picked.isEmpty
+                    ? const Text('No images selected')
+                    : SizedBox(
+                        height: 110,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _picked.length,
+                          itemBuilder: (context, idx) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(_picked[idx].path),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
                                     ),
-                                    Positioned(
-                                      right: 0,
-                                      top: 0,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          setState(() => _picked.removeAt(idx));
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black54,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() => _picked.removeAt(idx));
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 18,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _saveCat,
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: const Color(0xFF6C9A8B),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(17),
-                        ),
-                        textStyle: const TextStyle(
-                          fontFamily: 'MontserratAlternates',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          letterSpacing: 1.2,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      child: _isSaving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 25,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Save'),
+
+                const SizedBox(height: 24),
+
+                // Save
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isSaving ? null : _saveCat,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: const Color(0xFF6C9A8B),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(17),
+                      ),
                     ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 25,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Save',
+                            style: TextStyle(
+                              fontFamily: 'MontserratAlternates',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
