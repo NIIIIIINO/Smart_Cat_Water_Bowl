@@ -18,6 +18,15 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
+            ),
+          ),
+        ),
         centerTitle: true,
         title: const Text(
           'MeowFlow',
