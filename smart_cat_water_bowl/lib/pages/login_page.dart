@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // 🐱 รูปแมวด้านบน
-                  Image.asset('assets/images/finfin.png', height: 200),
+                  Image.asset('assets/images/logo.png', height: 200),
 
                   const SizedBox(height: 10), // ลดให้ชิด text Login
                   // ===== Title =====
@@ -93,13 +93,13 @@ class _LoginPageState extends State<LoginPage> {
                     'Welcome Back :)',
                     style: TextStyle(
                       fontFamily: 'MontserratAlternates',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFF5C4033),
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 17),
 
                   // ===== Email / Phone =====
                   TextField(
@@ -109,13 +109,13 @@ class _LoginPageState extends State<LoginPage> {
                       filled: true,
                       fillColor: Colors.white, // อ่านง่ายบน gradient
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(7),
                         borderSide: BorderSide.none,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 17),
 
                   // ===== Password =====
                   TextField(
@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(7),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                         backgroundColor: const Color(0xFF6C9A8B),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(17),
                         ),
                         textStyle: const TextStyle(
                           fontFamily: 'MontserratAlternates',
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: _isLoading
                           ? const SizedBox(
                               width: 20,
-                              height: 20,
+                              height: 25,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
