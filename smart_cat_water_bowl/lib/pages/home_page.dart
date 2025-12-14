@@ -23,14 +23,14 @@ class HomePage extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFF7F6A3), Color(0xFFFFC9E8)],
+              colors: [Color(0xFFF7F6A3)],
             ),
           ),
         ),
         centerTitle: true,
         title: const Text(
           'MeowFlow',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
         ),
       ),
       body: Column(
