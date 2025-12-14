@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // ✅ เหมือนหน้า Start: ใช้สีพื้นหลัง “สีเดียว”
-      backgroundColor: const Color(0xFFFAF3DD),
+      backgroundColor: const Color(0xFFF7F6A3),
 
       body: SafeArea(
         child: SingleChildScrollView(
