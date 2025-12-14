@@ -15,8 +15,14 @@ class InformationPage extends StatefulWidget {
 
 class _InformationPageState extends State<InformationPage> {
   final nameController = TextEditingController();
-  final ageController = TextEditingController();
+  final ageController =
+      TextEditingController(); // ✅ จะเก็บ ageText เช่น "2 ปี 3 เดือน"
   final weightController = TextEditingController();
+
+  // ✅ dropdown วัน/เดือน/ปี
+  int? _day;
+  int? _month;
+  int? _year;
 
   final List<XFile> _picked = [];
   bool _isSaving = false;
@@ -29,6 +35,54 @@ class _InformationPageState extends State<InformationPage> {
     ageController.dispose();
     weightController.dispose();
     super.dispose();
+  }
+
+  // ✅ helper: จำนวนวันในเดือนนั้น ๆ (รองรับ leap year)
+  int _daysInMonth(int year, int month) {
+    final firstDayThisMonth = DateTime(year, month, 1);
+    final firstDayNextMonth = DateTime(year, month + 1, 1);
+    return firstDayNextMonth.difference(firstDayThisMonth).inDays;
+  }
+
+  // ✅ คำนวณอายุแบบ "ปี + เดือน" แล้วใส่ลง ageController อัตโนมัติ
+  void _updateAgeFromBirthDate() {
+    if (_day == null || _month == null || _year == null) return;
+
+    final birthDate = DateTime(_year!, _month!, _day!);
+    final today = DateTime.now();
+
+    // รวมเป็นจำนวน "เดือน" ทั้งหมด
+    int totalMonths =
+        (today.year - birthDate.year) * 12 + (today.month - birthDate.month);
+
+    // ถ้าวันของวันนี้ยังไม่ถึงวันเกิดในเดือนนี้ ให้ลด 1 เดือน
+    if (today.day < birthDate.day) {
+      totalMonths--;
+    }
+
+    if (totalMonths < 0) totalMonths = 0;
+
+    final years = totalMonths ~/ 12;
+    final months = totalMonths % 12;
+
+    // สร้างข้อความ เช่น "2 ปี 3 เดือน" หรือ "5 เดือน"
+    String ageText = '';
+    if (years > 0) ageText += '$years ปี ';
+    ageText += '$months เดือน';
+
+    ageController.text = ageText;
+  }
+
+  // ✅ ดึง "อายุเป็นปี" (ใช้เก็บเป็นตัวเลขใน Firestore ถ้าต้องการ)
+  int _ageYearsFromBirthDate(DateTime birthDate) {
+    final today = DateTime.now();
+    int years = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      years--;
+    }
+    if (years < 0) years = 0;
+    return years;
   }
 
   Future<void> _pickImages() async {
@@ -59,8 +113,6 @@ class _InformationPageState extends State<InformationPage> {
         final url = await snapshot.ref.getDownloadURL();
         urls.add(url);
       } catch (e) {
-        // log and continue with other uploads
-        // we don't fail whole save for one bad image
         debugPrint('upload image error: $e');
       }
     }
@@ -69,15 +121,40 @@ class _InformationPageState extends State<InformationPage> {
 
   Future<void> _saveCat() async {
     final name = nameController.text.trim();
-    final age = int.tryParse(ageController.text.trim());
     final weight = double.tryParse(weightController.text.trim());
 
-    if (name.isEmpty || age == null || weight == null) {
+    // ✅ ตรวจ dropdown วันเดือนปี
+    if (_day == null || _month == null || _year == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณาเลือก วัน/เดือน/ปี ให้ครบ')),
+      );
+      return;
+    }
+
+    // ✅ สร้างวันเกิด
+    late final DateTime birthDate;
+    try {
+      birthDate = DateTime(_year!, _month!, _day!);
+    } catch (_) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('วันเดือนปีไม่ถูกต้อง')));
+      return;
+    }
+
+    // ✅ คำนวณอายุอัตโนมัติ (ถ้ายังไม่คำนวณ ให้คำนวณก่อนเซฟ)
+    _updateAgeFromBirthDate();
+    final ageText = ageController.text.trim();
+
+    if (name.isEmpty || weight == null || ageText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
       );
       return;
     }
+
+    // ✅ เก็บ age เป็น "ปี" ด้วย (เผื่อ query/filter ง่าย)
+    final ageYears = _ageYearsFromBirthDate(birthDate);
 
     setState(() => _isSaving = true);
     try {
@@ -94,7 +171,9 @@ class _InformationPageState extends State<InformationPage> {
 
       await docRef.set({
         'name': name,
-        'age': age,
+        'age': ageYears, // ✅ อายุเป็นปี (ตัวเลข)
+        'ageText': ageText, // ✅ อายุแบบ "2 ปี 3 เดือน"
+        'birthDate': Timestamp.fromDate(birthDate), // ✅ วันเดือนปี
         'weight': weight,
         'images': imageUrls,
         'ownerUid': ownerUid,
@@ -116,11 +195,31 @@ class _InformationPageState extends State<InformationPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ ปีให้เลือก (ย้อนหลัง 25 ปี ถึงปีปัจจุบัน)
+    final currentYear = DateTime.now().year;
+    final years = List<int>.generate(26, (i) => currentYear - i);
+
+    // ✅ เดือน 1-12
+    final months = List<int>.generate(12, (i) => i + 1);
+
+    // ✅ วัน: ต้องรู้ปี+เดือนก่อน (กันวันที่เกิน)
+    final int safeYear = _year ?? currentYear;
+    final int safeMonth = _month ?? 1;
+    final maxDay = _daysInMonth(safeYear, safeMonth);
+    final days = List<int>.generate(maxDay, (i) => i + 1);
+
+    // ถ้าเลือกวันไว้แล้ว แต่เดือน/ปีเปลี่ยนจนวันเกิน ให้รีเซ็ตวัน
+    if (_day != null && _day! > maxDay) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _day = null);
+      });
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -139,23 +238,126 @@ class _InformationPageState extends State<InformationPage> {
               decoration: const InputDecoration(labelText: 'Cat Name'),
             ),
             const SizedBox(height: 10),
+
+            // ✅ Age Auto (readOnly)
             TextField(
               controller: ageController,
-              decoration: const InputDecoration(labelText: 'Age'),
-              keyboardType: TextInputType.number,
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: 'Age (Auto: ปี/เดือน)',
+              ),
             ),
+
             const SizedBox(height: 10),
+
+            // ✅ Dropdown วัน/เดือน/ปี (ต่อท้าย Age)
+            const Text(
+              'Birth Date (Day/Month/Year)',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                // Day
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: _day,
+                    decoration: const InputDecoration(
+                      labelText: 'Day',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: days
+                        .map(
+                          (d) => DropdownMenuItem(
+                            value: d,
+                            child: Text(d.toString()),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _day = v;
+                        _updateAgeFromBirthDate(); // ✅ คำนวณอายุ
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+
+                // Month
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: _month,
+                    decoration: const InputDecoration(
+                      labelText: 'Month',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: months
+                        .map(
+                          (m) => DropdownMenuItem(
+                            value: m,
+                            child: Text(m.toString()),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _month = v;
+                        _updateAgeFromBirthDate(); // ✅ คำนวณอายุ
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+
+                // Year
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: _year,
+                    decoration: const InputDecoration(
+                      labelText: 'Year',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: years
+                        .map(
+                          (y) => DropdownMenuItem(
+                            value: y,
+                            child: Text(y.toString()),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _year = v;
+                        _updateAgeFromBirthDate(); // ✅ คำนวณอายุ
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
             TextField(
               controller: weightController,
               decoration: const InputDecoration(labelText: 'Weight (kg)'),
               keyboardType: TextInputType.number,
             ),
+
             const SizedBox(height: 20),
+
             ElevatedButton(
               onPressed: _pickImages,
               child: const Text('Pick Images'),
             ),
+
             const SizedBox(height: 12),
+
             _picked.isEmpty
                 ? const Text('No images selected')
                 : SizedBox(
@@ -204,7 +406,9 @@ class _InformationPageState extends State<InformationPage> {
                       },
                     ),
                   ),
+
             const SizedBox(height: 30),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
