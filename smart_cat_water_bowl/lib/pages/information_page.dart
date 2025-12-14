@@ -49,14 +49,20 @@ class _InformationPageState extends State<InformationPage> {
     final uid = user?.uid ?? 'unknown';
 
     for (var i = 0; i < _picked.length; i++) {
-      final file = File(_picked[i].path);
-      final ref = FirebaseStorage.instance.ref().child(
-        'cats/$uid/$catId/${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
-      );
-      final task = ref.putFile(file);
-      final snapshot = await task.whenComplete(() {});
-      final url = await snapshot.ref.getDownloadURL();
-      urls.add(url);
+      try {
+        final file = File(_picked[i].path);
+        final ref = FirebaseStorage.instance.ref().child(
+          'cats/$uid/$catId/${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
+        );
+        final uploadTask = ref.putFile(file);
+        final snapshot = await uploadTask.whenComplete(() {});
+        final url = await snapshot.ref.getDownloadURL();
+        urls.add(url);
+      } catch (e) {
+        // log and continue with other uploads
+        // we don't fail whole save for one bad image
+        debugPrint('upload image error: $e');
+      }
     }
     return urls;
   }
@@ -141,18 +147,46 @@ class _InformationPageState extends State<InformationPage> {
             _picked.isEmpty
                 ? const Text('No images selected')
                 : SizedBox(
-                    height: 100,
+                    height: 110,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: _picked.length,
                       itemBuilder: (context, idx) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 8.0),
-                          child: Image.file(
-                            File(_picked[idx].path),
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(_picked[idx].path),
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() => _picked.removeAt(idx));
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },
