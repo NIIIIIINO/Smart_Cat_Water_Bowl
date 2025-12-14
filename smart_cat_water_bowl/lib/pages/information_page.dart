@@ -30,6 +30,9 @@ class _InformationPageState extends State<InformationPage> {
   // ✅ รูปหลายรูป (แกลเลอรี่แมว)
   final List<XFile> _picked = [];
 
+  // ✅ Gender dropdown
+  String? _gender; // 'Male' | 'Female' | 'Unknown'
+
   bool _isSaving = false;
   final ImagePicker _picker = ImagePicker();
 
@@ -65,8 +68,8 @@ class _InformationPageState extends State<InformationPage> {
     final months = totalMonths % 12;
 
     String ageText = '';
-    if (years > 0) ageText += '$years ปี ';
-    ageText += '$months เดือน';
+    if (years > 0) ageText += '$years Y ';
+    ageText += '$months M';
 
     ageController.text = ageText;
   }
@@ -221,6 +224,14 @@ class _InformationPageState extends State<InformationPage> {
       return;
     }
 
+    // ✅ เพิ่ม validation gender
+    if (_gender == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('กรุณาเลือกเพศของแมว')));
+      return;
+    }
+
     late final DateTime birthDate;
     try {
       birthDate = DateTime(_year!, _month!, _day!);
@@ -251,10 +262,8 @@ class _InformationPageState extends State<InformationPage> {
       final docRef = FirebaseFirestore.instance.collection('cats').doc();
       final catId = docRef.id;
 
-      // ✅ upload profile (1 รูป)
       final profileUrl = await _uploadProfileImage(catId);
 
-      // ✅ upload รูปหลายรูป
       List<String> imageUrls = [];
       if (_picked.isNotEmpty) {
         imageUrls = await _uploadImages(catId);
@@ -262,11 +271,12 @@ class _InformationPageState extends State<InformationPage> {
 
       await docRef.set({
         'name': name,
+        'gender': _gender, // ✅ เพิ่ม gender
         'age': ageYears,
         'ageText': ageText,
         'birthDate': Timestamp.fromDate(birthDate),
         'weight': weight,
-        'profileImage': profileUrl, // ✅ เพิ่มรูปโปรไฟล์
+        'profileImage': profileUrl,
         'images': imageUrls,
         'ownerUid': ownerUid,
         'createdAt': FieldValue.serverTimestamp(),
@@ -310,11 +320,20 @@ class _InformationPageState extends State<InformationPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFF7F6A3), Color(0xFFFFC9E8)],
+              colors: [Color(0xFFFFC9E8)],
             ),
           ),
         ),
-        title: const Text('Add Cat Information'),
+        centerTitle: true,
+        title: const Text(
+          'Add Cat Information',
+          style: TextStyle(
+            fontFamily: 'Lobster',
+            fontSize: 30,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF5C4033),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Center(
@@ -325,7 +344,6 @@ class _InformationPageState extends State<InformationPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // ✅ รูปโปรไฟล์แบบวงกลม (กดแล้วเลือก กล้อง/แกลเลอรี่)
                   GestureDetector(
                     onTap: _showPickProfileSheet,
                     child: Stack(
@@ -367,27 +385,21 @@ class _InformationPageState extends State<InformationPage> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 17),
 
-                  // ===== Cat Name =====
                   TextField(
                     controller: nameController,
                     decoration: _fieldDecoration('Cat Name'),
                   ),
-
                   const SizedBox(height: 17),
 
-                  // ===== Age Auto =====
                   TextField(
                     controller: ageController,
                     readOnly: true,
-                    decoration: _fieldDecoration('Age (Auto: ปี/เดือน)'),
+                    decoration: _fieldDecoration('Age (Auto: Y/M)'),
                   ),
-
                   const SizedBox(height: 17),
 
-                  // ===== Birth Date =====
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -470,6 +482,23 @@ class _InformationPageState extends State<InformationPage> {
 
                   const SizedBox(height: 17),
 
+                  // ✅ Gender dropdown (วาง "บนช่อง weight")
+                  DropdownButtonFormField<String>(
+                    value: _gender,
+                    decoration: _fieldDecoration('Gender'),
+                    items: const [
+                      DropdownMenuItem(value: 'Male', child: Text('Male')),
+                      DropdownMenuItem(value: 'Female', child: Text('Female')),
+                      DropdownMenuItem(
+                        value: 'Unknown',
+                        child: Text('Unknown'),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() => _gender = v),
+                  ),
+
+                  const SizedBox(height: 17),
+
                   // ===== Weight =====
                   TextField(
                     controller: weightController,
@@ -479,27 +508,33 @@ class _InformationPageState extends State<InformationPage> {
 
                   const SizedBox(height: 24),
 
-                  // ===== Pick Images =====
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       onPressed: _pickImages,
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: const Color(0xFF6C9A8B),
-                        foregroundColor: Colors.white,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.transparent, // ✅ โปร่งใส
+                        side: const BorderSide(
+                          color: Color(0xFF6C9A8B), // ✅ กรอบสีเขียว
+                          width: 2,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(17),
                         ),
-                        textStyle: const TextStyle(
+                      ),
+                      child: const Text(
+                        'Pick Images',
+                        style: TextStyle(
                           fontFamily: 'MontserratAlternates',
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                           letterSpacing: 1.2,
+                          color: Color(
+                            0xFF6C9A8B,
+                          ), // ✅ ตัวหนังสือสีเขียว (ให้เข้ากับกรอบ)
                         ),
                       ),
-                      child: const Text('Pick Images'),
                     ),
                   ),
 
@@ -558,7 +593,6 @@ class _InformationPageState extends State<InformationPage> {
 
                   const SizedBox(height: 24),
 
-                  // ===== Save =====
                   SizedBox(
                     width: double.infinity,
                     height: 50,
