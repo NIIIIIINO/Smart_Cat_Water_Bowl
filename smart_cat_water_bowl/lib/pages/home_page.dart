@@ -16,6 +16,7 @@ class HomePage extends StatelessWidget {
         .snapshots();
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
