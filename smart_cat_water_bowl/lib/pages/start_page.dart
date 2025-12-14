@@ -13,23 +13,16 @@ class StartPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Image.asset('assets/images/logo.png', width: 200),
-                const Positioned(
-                  bottom: 0, // ปรับระยะห่างจากด้านล่างของรูป
-                  child: Text(
-                    'Meow Flow',
-                    style: TextStyle(
-                      fontFamily: 'Lobster',
-                      fontSize: 37,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF5C4033),
-                    ),
-                  ),
-                ),
-              ],
+            Image.asset('assets/images/logo.png', width: 200),
+            const SizedBox(height: 14), // ระยะห่างเท่ากับ welcome_page
+            const Text(
+              'Meow Flow',
+              style: TextStyle(
+                fontFamily: 'Lobster',
+                fontSize: 37,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF5C4033),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
