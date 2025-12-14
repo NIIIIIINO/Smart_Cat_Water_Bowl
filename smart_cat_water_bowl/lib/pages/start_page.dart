@@ -12,7 +12,7 @@ class StartPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/logo.png', width: 140),
+            Image.asset('assets/images/logo.png', width: 200),
             const SizedBox(height: 7),
             const Text(
               'Meow Flow',
