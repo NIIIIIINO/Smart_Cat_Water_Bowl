@@ -62,202 +62,126 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ปรับค่านี้เพื่อเปลี่ยนความสูงของพื้นที่ด้านบน (AppBar)
-    final double toolbarH = 300; // <-- ปรับได้
-    final double imageH = 200; // <-- ปรับขนาดรูป
-
-    // ทำให้รูปอยู่กึ่งกลางแนวตั้งใน AppBar
-    final double verticalPadding = (toolbarH - imageH) / 2;
-
-    // คุมช่องว่างระหว่างรูปกับส่วน body (0.0 = ชิดสุด)
-    final double bodyTopSpacingFactor = 0.0; // ปรับค่านี้ (0.0 - 1.0)
-    final double bodyTopSpacing = verticalPadding * bodyTopSpacingFactor;
-
     return Scaffold(
       backgroundColor: Colors.transparent,
-
-      // ================= APP BAR =================
-      appBar: AppBar(
-        toolbarHeight: toolbarH,
-        backgroundColor: const Color(0xFFFAF3DD),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-
-        // ปิดปุ่มย้อนกลับไว้ก่อน
-        // leading: TextButton(
-        //   onPressed: () {
-        //     Navigator.pushReplacementNamed(context, '/welcome');
-        //   },
-        //   child: const Text(
-        //     '<<',
-        //     style: TextStyle(
-        //       fontFamily: 'MontserratAlternates',
-        //       fontSize: 25,
-        //       fontWeight: FontWeight.w700,
-        //       color: Color(0xFF5C4033),
-        //     ),
-        //   ),
-        // ),
-        leading: null,
-        centerTitle: true,
-
-        // แสดงเฉพาะรูป และจัดให้รูปอยู่กึ่งกลางแนวตั้งของ AppBar
-        title: SizedBox(
-          height: toolbarH,
-          child: Center(
-            child: Image.asset('assets/images/finfin.png', height: imageH),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
           ),
         ),
-      ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                // ย้ายรูป finfin มาที่ body
+                Image.asset('assets/images/finfin.png', height: 200),
 
-      // ================= BODY =================
-      body: Column(
-        children: [
-          SizedBox(height: bodyTopSpacing),
+                const SizedBox(height: 24),
 
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-
-                // =====================================================
-                // 🔴 ปิดแถบสีขาว (White Card) ไว้ก่อน
-                // ถ้าจะเปิดกลับมา ให้เอา // ออกทั้งบล็อก Container ด้านล่าง
-                // =====================================================
-
-                // child: Container(
-                //   width: double.infinity,
-                //   padding: const EdgeInsets.all(24),
-                //   decoration: BoxDecoration(
-                //     color: Colors.white,
-                //     borderRadius: const BorderRadius.vertical(
-                //       top: Radius.circular(32),
-                //     ),
-                //     boxShadow: [
-                //       BoxShadow(
-                //         color: Colors.black.withOpacity(0.08),
-                //         blurRadius: 20,
-                //         offset: const Offset(0, -4),
-                //       ),
-                //     ],
-                //   ),
-                //   child: SingleChildScrollView(
-                //     child: Column(
-                //       children: [
-
-                // ✅ ตอนนี้ใช้เนื้อหาด้านในโดยตรง (ไม่มีแถบสีขาว)
-                child: Column(
-                  children: [
-                    const Text(
-                      'Login',
-                      style: TextStyle(
-                        fontFamily: 'MontserratAlternates',
-                        fontSize: 27,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF5C4033),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    TextField(
-                      controller: _emailC,
-                      decoration: InputDecoration(
-                        hintText: 'Email / Phone',
-                        filled: true,
-                        fillColor: const Color(0xFFF3F3F3),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      controller: _passwordC,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        filled: true,
-                        fillColor: const Color(0xFFF3F3F3),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _signIn,
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: const Color(0xFF6C9A8B),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          textStyle: const TextStyle(
-                            fontFamily: 'MontserratAlternates',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: 'MontserratAlternates',
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/register');
-                      },
-                      child: const Text(
-                        'Create an account',
-                        style: TextStyle(
-                          fontFamily: 'MontserratAlternates',
-                          color: Color(0xFF5C4033),
-                        ),
-                      ),
-                    ),
-                  ],
+                const Text(
+                  'Login',
+                  style: TextStyle(
+                    fontFamily: 'MontserratAlternates',
+                    fontSize: 27,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF5C4033),
+                  ),
                 ),
 
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // =====================================================
-                // 🔴 จบส่วนแถบสีขาว
-                // =====================================================
-              ),
+                const SizedBox(height: 24),
+
+                TextField(
+                  controller: _emailC,
+                  decoration: InputDecoration(
+                    hintText: 'Email / Phone',
+                    filled: true,
+                    fillColor: const Color(0xFFF3F3F3),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: _passwordC,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    filled: true,
+                    fillColor: const Color(0xFFF3F3F3),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _signIn,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: const Color(0xFF6C9A8B),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: const TextStyle(
+                        fontFamily: 'MontserratAlternates',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'MontserratAlternates',
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/register');
+                  },
+                  child: const Text(
+                    'Create an account',
+                    style: TextStyle(
+                      fontFamily: 'MontserratAlternates',
+                      color: Color(0xFF5C4033),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
