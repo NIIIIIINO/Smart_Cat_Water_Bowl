@@ -15,7 +15,8 @@ class InformationPage extends StatefulWidget {
 
 class _InformationPageState extends State<InformationPage> {
   final nameController = TextEditingController();
-  final ageController = TextEditingController(); // ✅ "2 ปี 3 เดือน"
+  final ageController =
+      TextEditingController(); // ✅ เก็บ ageText เช่น "2 ปี 3 เดือน"
   final weightController = TextEditingController();
 
   // ✅ dropdown วัน/เดือน/ปี
@@ -26,9 +27,10 @@ class _InformationPageState extends State<InformationPage> {
   // ✅ รูปโปรไฟล์ (1 รูป)
   XFile? _profileImage;
 
+  // ✅ รูปหลายรูป (แกลเลอรี่แมว)
   final List<XFile> _picked = [];
-  bool _isSaving = false;
 
+  bool _isSaving = false;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -39,12 +41,14 @@ class _InformationPageState extends State<InformationPage> {
     super.dispose();
   }
 
+  // ✅ helper: จำนวนวันในเดือนนั้น ๆ (รองรับ leap year)
   int _daysInMonth(int year, int month) {
     final firstDayThisMonth = DateTime(year, month, 1);
     final firstDayNextMonth = DateTime(year, month + 1, 1);
     return firstDayNextMonth.difference(firstDayThisMonth).inDays;
   }
 
+  // ✅ คำนวณอายุแบบ "ปี + เดือน" แล้วใส่ลง ageController อัตโนมัติ
   void _updateAgeFromBirthDate() {
     if (_day == null || _month == null || _year == null) return;
 
@@ -67,6 +71,7 @@ class _InformationPageState extends State<InformationPage> {
     ageController.text = ageText;
   }
 
+  // ✅ ดึง "อายุเป็นปี" (เก็บตัวเลขใน Firestore)
   int _ageYearsFromBirthDate(DateTime birthDate) {
     final today = DateTime.now();
     int years = today.year - birthDate.year;
@@ -78,6 +83,7 @@ class _InformationPageState extends State<InformationPage> {
     return years;
   }
 
+  // ✅ style ของช่องกรอกให้เหมือนหน้า Login
   InputDecoration _fieldDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
@@ -90,11 +96,11 @@ class _InformationPageState extends State<InformationPage> {
     );
   }
 
-  // ✅ เลือกรูปโปรไฟล์ 1 รูป
-  Future<void> _pickProfileImage() async {
+  // ================== PROFILE IMAGE ==================
+  Future<void> _pickProfileImage(ImageSource source) async {
     try {
       final XFile? img = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 80,
       );
       if (img == null) return;
@@ -102,7 +108,7 @@ class _InformationPageState extends State<InformationPage> {
       setState(() {
         _profileImage = img;
 
-        // ถ้ายังไม่มีรูปใน list ก็ใส่รูปโปรไฟล์เป็นรูปแรกไว้ด้วย (ออปชัน)
+        // (ออปชัน) ถ้ายังไม่มีรูปใน list ให้ใส่รูปโปรไฟล์เป็นรูปแรก
         if (_picked.isEmpty) _picked.add(img);
       });
     } catch (e) {
@@ -112,17 +118,50 @@ class _InformationPageState extends State<InformationPage> {
     }
   }
 
+  void _showPickProfileSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('เลือกจากแกลเลอรี่'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickProfileImage(ImageSource.gallery);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('ถ่ายรูปด้วยกล้อง'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickProfileImage(ImageSource.camera);
+                  },
+                ),
+                const SizedBox(height: 6),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ================== MULTI IMAGES ==================
   Future<void> _pickImages() async {
     try {
       final List<XFile>? imgs = await _picker.pickMultiImage(imageQuality: 80);
       if (imgs == null) return;
-
-      setState(() {
-        _picked.addAll(imgs);
-
-        // ✅ ถ้ายังไม่มีรูปโปรไฟล์ ให้ใช้รูปแรกที่เพิ่งเลือกเป็นโปรไฟล์อัตโนมัติ
-        _profileImage ??= imgs.isNotEmpty ? imgs.first : null;
-      });
+      setState(() => _picked.addAll(imgs));
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -152,19 +191,17 @@ class _InformationPageState extends State<InformationPage> {
     return urls;
   }
 
-  // ✅ อัปโหลดรูปโปรไฟล์แยก (ถ้ามี)
   Future<String?> _uploadProfileImage(String catId) async {
     if (_profileImage == null) return null;
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      final uid = user?.uid ?? 'unknown';
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid ?? 'unknown';
 
+    try {
       final file = File(_profileImage!.path);
       final ref = FirebaseStorage.instance.ref().child(
         'cats/$uid/$catId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
-
       final snapshot = await ref.putFile(file).whenComplete(() {});
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
@@ -214,8 +251,10 @@ class _InformationPageState extends State<InformationPage> {
       final docRef = FirebaseFirestore.instance.collection('cats').doc();
       final catId = docRef.id;
 
-      // ✅ อัปโหลดรูป
+      // ✅ upload profile (1 รูป)
       final profileUrl = await _uploadProfileImage(catId);
+
+      // ✅ upload รูปหลายรูป
       List<String> imageUrls = [];
       if (_picked.isNotEmpty) {
         imageUrls = await _uploadImages(catId);
@@ -227,7 +266,7 @@ class _InformationPageState extends State<InformationPage> {
         'ageText': ageText,
         'birthDate': Timestamp.fromDate(birthDate),
         'weight': weight,
-        'profileImage': profileUrl, // ✅ รูปโปรไฟล์
+        'profileImage': profileUrl, // ✅ เพิ่มรูปโปรไฟล์
         'images': imageUrls,
         'ownerUid': ownerUid,
         'createdAt': FieldValue.serverTimestamp(),
@@ -286,9 +325,9 @@ class _InformationPageState extends State<InformationPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // ✅ วงกลมรูปโปรไฟล์ (อยู่บน Cat Name)
+                  // ✅ รูปโปรไฟล์แบบวงกลม (กดแล้วเลือก กล้อง/แกลเลอรี่)
                   GestureDetector(
-                    onTap: _pickProfileImage,
+                    onTap: _showPickProfileSheet,
                     child: Stack(
                       children: [
                         CircleAvatar(
@@ -296,24 +335,24 @@ class _InformationPageState extends State<InformationPage> {
                           backgroundColor: Colors.white,
                           child: CircleAvatar(
                             radius: 52,
-                            backgroundColor: const Color(0xFFEDEDED),
-                            backgroundImage: _profileImage == null
-                                ? null
-                                : FileImage(File(_profileImage!.path)),
+                            backgroundColor: const Color(0xFFEFEFEF),
+                            backgroundImage: _profileImage != null
+                                ? FileImage(File(_profileImage!.path))
+                                : null,
                             child: _profileImage == null
                                 ? const Icon(
                                     Icons.pets,
-                                    size: 40,
-                                    color: Color(0xFF5C4033),
+                                    size: 42,
+                                    color: Color(0xFF6C9A8B),
                                   )
                                 : null,
                           ),
                         ),
                         Positioned(
-                          right: 0,
-                          bottom: 0,
+                          right: 2,
+                          bottom: 2,
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(7),
                             decoration: const BoxDecoration(
                               color: Color(0xFF6C9A8B),
                               shape: BoxShape.circle,
