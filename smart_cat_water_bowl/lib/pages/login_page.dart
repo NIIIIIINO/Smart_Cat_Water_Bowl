@@ -187,6 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                         color: Color.fromARGB(255, 255, 255, 255),
                         decoration: TextDecoration.underline,
                         decorationColor: Color(0xFF5C4033), // สีเส้นใต้
+                        fontSize: 16, // เพิ่มขนาดตัวอักษร
                       ),
                     ),
                     child: const Text('Create an account'),
