@@ -62,119 +62,121 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.transparent,
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // 🐱 รูปแมวด้านบน
-                Image.asset('assets/images/finfin.png', height: 200),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // 🐱 รูปแมวด้านบน
+                  Image.asset('assets/images/finfin.png', height: 200),
 
-                const SizedBox(height: 24),
-
-                // ===== Title =====
-                const Text(
-                  'Login',
-                  style: TextStyle(
-                    fontFamily: 'MontserratAlternates',
-                    fontSize: 40,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF5C4033),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ===== Email / Phone =====
-                TextField(
-                  controller: _emailC,
-                  decoration: InputDecoration(
-                    hintText: 'Email / Phone',
-                    filled: true,
-                    fillColor: Colors.white, // อ่านง่ายบน gradient
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ===== Password =====
-                TextField(
-                  controller: _passwordC,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // ===== Login Button =====
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _signIn,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: const Color(0xFF6C9A8B),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      textStyle: const TextStyle(
-                        fontFamily: 'MontserratAlternates',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'MontserratAlternates',
-                            ),
-                          ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ===== Register =====
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/register');
-                  },
-                  child: const Text(
-                    'Create an account',
+                  const SizedBox(height: 10), // ลดให้ชิด text Login
+                  // ===== Title =====
+                  const Text(
+                    'Login',
                     style: TextStyle(
                       fontFamily: 'MontserratAlternates',
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
                       color: Color(0xFF5C4033),
                     ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 24),
+
+                  // ===== Email / Phone =====
+                  TextField(
+                    controller: _emailC,
+                    decoration: InputDecoration(
+                      hintText: 'Email / Phone',
+                      filled: true,
+                      fillColor: Colors.white, // อ่านง่ายบน gradient
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ===== Password =====
+                  TextField(
+                    controller: _passwordC,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ===== Login Button =====
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _signIn,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF6C9A8B),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: const TextStyle(
+                          fontFamily: 'MontserratAlternates',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'MontserratAlternates',
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ===== Register =====
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/register');
+                    },
+                    child: const Text(
+                      'Create an account',
+                      style: TextStyle(
+                        fontFamily: 'MontserratAlternates',
+                        color: Color(0xFF5C4033),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
