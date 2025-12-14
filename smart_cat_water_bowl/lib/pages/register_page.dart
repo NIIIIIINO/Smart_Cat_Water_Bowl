@@ -74,6 +74,15 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
+            ),
+          ),
+        ),
         title: const Text('Register'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
