@@ -59,8 +59,8 @@ class MyApp extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFAF3DD), // #FAF3DD ข้างบน
-              Color(0xFFF7F6A3), // #F7F6A3 ข้างล่าง
+              Color(0xFFF7F6A3), // #F7F6A3 ข้างบน
+              Color(0xFFFFC9E8), // #FFC9E8 ข้างล่าง
             ],
           ),
         ),
