@@ -117,6 +117,7 @@ class _InformationPageState extends State<InformationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('Add Cat Information')),
       body: Padding(
         padding: const EdgeInsets.all(16),
