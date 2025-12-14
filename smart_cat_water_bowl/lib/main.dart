@@ -26,9 +26,9 @@ class MyApp extends StatelessWidget {
       // ===== Theme ทั้งแอป =====
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFFAF3DD),
+        // scaffoldBackgroundColor: const Color(0xFFFAF3DD), // ลบออกเพื่อใช้ gradient แทน
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFFAF3DD),
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.black,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
@@ -50,6 +50,21 @@ class MyApp extends StatelessWidget {
             shape: StadiumBorder(),
           ),
         ),
+      ),
+
+      // ===== Builder สำหรับ gradient background =====
+      builder: (context, child) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFAF3DD), // #FAF3DD ข้างบน
+              Color(0xFFF7F6A3), // #F7F6A3 ข้างล่าง
+            ],
+          ),
+        ),
+        child: child,
       ),
 
       // ===== Routing =====
