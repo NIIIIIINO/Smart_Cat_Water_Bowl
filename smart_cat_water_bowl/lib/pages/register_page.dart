@@ -11,6 +11,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailC = TextEditingController();
+  final TextEditingController _phoneC = TextEditingController();
   final TextEditingController _passwordC = TextEditingController();
   final TextEditingController _confirmC = TextEditingController();
   bool _isLoading = false;
@@ -18,6 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void dispose() {
     _emailC.dispose();
+    _phoneC.dispose();
     _passwordC.dispose();
     _confirmC.dispose();
     super.dispose();
@@ -25,10 +27,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _createAccount() async {
     final email = _emailC.text.trim();
+    final phone = _phoneC.text.trim();
     final password = _passwordC.text;
     final confirm = _confirmC.text;
 
-    if (email.isEmpty || password.isEmpty || confirm.isEmpty) {
+    if (email.isEmpty || phone.isEmpty || password.isEmpty || confirm.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('โปรดกรอกข้อมูลให้ครบ')));
@@ -51,6 +54,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (uid != null) {
         await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'email': email,
+          'phone': phone,
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
@@ -98,6 +102,12 @@ class _RegisterPageState extends State<RegisterPage> {
             TextField(
               controller: _emailC,
               decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _phoneC,
+              decoration: const InputDecoration(labelText: 'Phone'),
+              keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 10),
             TextField(
