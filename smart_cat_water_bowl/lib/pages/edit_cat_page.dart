@@ -15,11 +15,17 @@ class _EditCatPageState extends State<EditCatPage> {
   late TextEditingController _nameCtrl;
   late TextEditingController _ageTextCtrl;
   late TextEditingController _weightCtrl;
+
   String? _gender;
   int? _day;
   int? _month;
   int? _year;
   bool _saving = false;
+
+  // ✅ ธีมสีเดียวกับหน้าที่แล้ว
+  static const _bgTop = Color(0xFFFAF3DD);
+  static const _bgBottom = Color(0xFFF7F6A3);
+  static const _textBrown = Color(0xFF5C4033);
 
   @override
   void initState() {
@@ -75,16 +81,6 @@ class _EditCatPageState extends State<EditCatPage> {
     _ageTextCtrl.text = ageText;
   }
 
-  int _ageYearsFromBirthDate(DateTime birthDate) {
-    final today = DateTime.now();
-    int years = today.year - birthDate.year;
-    if (today.month < birthDate.month ||
-        (today.month == birthDate.month && today.day < birthDate.day))
-      years--;
-    if (years < 0) years = 0;
-    return years;
-  }
-
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -97,6 +93,7 @@ class _EditCatPageState extends State<EditCatPage> {
     final name = _nameCtrl.text.trim();
     final ageText = _ageTextCtrl.text.trim();
     final weight = double.tryParse(_weightCtrl.text.trim());
+
     if (name.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -125,7 +122,7 @@ class _EditCatPageState extends State<EditCatPage> {
         'weight': weight,
         'gender': _gender,
       });
-      Navigator.of(context).pop(true);
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -155,6 +152,7 @@ class _EditCatPageState extends State<EditCatPage> {
         ],
       ),
     );
+
     if (ok != true) return;
 
     setState(() => _saving = true);
@@ -163,7 +161,7 @@ class _EditCatPageState extends State<EditCatPage> {
           .collection('cats')
           .doc(widget.docId);
       await ref.delete();
-      Navigator.of(context).pop(true);
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -176,146 +174,187 @@ class _EditCatPageState extends State<EditCatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
+
+      // ✅ AppBar สีเหมือนหน้าที่แล้ว
       appBar: AppBar(
-        title: const Text('Edit Cat'),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: _textBrown),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [_bgTop, _bgBottom],
+            ),
+          ),
+        ),
+        title: const Text(
+          'Edit Cat',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 22,
+            color: _textBrown,
+            // fontFamily: 'MontserratAlternates',
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: 'Delete',
             icon: const Icon(Icons.delete_outline),
+            color: Colors.red,
             onPressed: _saving ? null : _delete,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _ageTextCtrl,
-              readOnly: true,
-              decoration: const InputDecoration(labelText: 'Age (Auto: Y/M)'),
-            ),
-            const SizedBox(height: 12),
 
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Birth Date (Day/Month/Year)',
-                style: TextStyle(fontWeight: FontWeight.w600),
+      // ✅ พื้นหลัง body สีเหมือนหน้าที่แล้ว
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_bgTop, _bgBottom],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(labelText: 'Name'),
               ),
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
-            Builder(
-              builder: (context) {
-                final currentYear = DateTime.now().year;
-                final years = List<int>.generate(26, (i) => currentYear - i);
-                final months = List<int>.generate(12, (i) => i + 1);
-                final safeYear = _year ?? currentYear;
-                final safeMonth = _month ?? 1;
-                final maxDay = _daysInMonth(safeYear, safeMonth);
-                final days = List<int>.generate(maxDay, (i) => i + 1);
+              TextField(
+                controller: _ageTextCtrl,
+                readOnly: true,
+                decoration: const InputDecoration(labelText: 'Age (Auto: Y/M)'),
+              ),
+              const SizedBox(height: 12),
 
-                if (_day != null && _day! > maxDay) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) setState(() => _day = null);
-                  });
-                }
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Birth Date (Day/Month/Year)',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(height: 8),
 
-                return Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<int>(
-                        isExpanded: true,
-                        value: _day,
-                        decoration: const InputDecoration(labelText: 'Day'),
-                        items: days
-                            .map(
-                              (d) => DropdownMenuItem(
-                                value: d,
-                                child: Text(d.toString()),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) => setState(() {
-                          _day = v;
-                          _updateAgeFromBirthDate();
-                        }),
+              Builder(
+                builder: (context) {
+                  final currentYear = DateTime.now().year;
+                  final years = List<int>.generate(26, (i) => currentYear - i);
+                  final months = List<int>.generate(12, (i) => i + 1);
+
+                  final safeYear = _year ?? currentYear;
+                  final safeMonth = _month ?? 1;
+                  final maxDay = _daysInMonth(safeYear, safeMonth);
+                  final days = List<int>.generate(maxDay, (i) => i + 1);
+
+                  if (_day != null && _day! > maxDay) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) setState(() => _day = null);
+                    });
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          value: _day,
+                          decoration: const InputDecoration(labelText: 'Day'),
+                          items: days
+                              .map(
+                                (d) => DropdownMenuItem(
+                                  value: d,
+                                  child: Text(d.toString()),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) => setState(() {
+                            _day = v;
+                            _updateAgeFromBirthDate();
+                          }),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DropdownButtonFormField<int>(
-                        isExpanded: true,
-                        value: _month,
-                        decoration: const InputDecoration(labelText: 'Month'),
-                        items: months
-                            .map(
-                              (m) => DropdownMenuItem(
-                                value: m,
-                                child: Text(m.toString()),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) => setState(() {
-                          _month = v;
-                          _updateAgeFromBirthDate();
-                        }),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          value: _month,
+                          decoration: const InputDecoration(labelText: 'Month'),
+                          items: months
+                              .map(
+                                (m) => DropdownMenuItem(
+                                  value: m,
+                                  child: Text(m.toString()),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) => setState(() {
+                            _month = v;
+                            _updateAgeFromBirthDate();
+                          }),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DropdownButtonFormField<int>(
-                        isExpanded: true,
-                        value: _year,
-                        decoration: const InputDecoration(labelText: 'Year'),
-                        items: years
-                            .map(
-                              (y) => DropdownMenuItem(
-                                value: y,
-                                child: Text(y.toString()),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) => setState(() {
-                          _year = v;
-                          _updateAgeFromBirthDate();
-                        }),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          value: _year,
+                          decoration: const InputDecoration(labelText: 'Year'),
+                          items: years
+                              .map(
+                                (y) => DropdownMenuItem(
+                                  value: y,
+                                  child: Text(y.toString()),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) => setState(() {
+                            _year = v;
+                            _updateAgeFromBirthDate();
+                          }),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _weightCtrl,
-              decoration: const InputDecoration(labelText: 'Weight (kg)'),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _gender,
-              items: const [
-                DropdownMenuItem(value: 'Male', child: Text('Male')),
-                DropdownMenuItem(value: 'Female', child: Text('Female')),
-                DropdownMenuItem(value: 'Unknown', child: Text('Unknown')),
-              ],
-              onChanged: (v) => setState(() => _gender = v),
-              decoration: const InputDecoration(labelText: 'Gender'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _saving ? null : _save,
-              icon: const Icon(Icons.save),
-              label: const Text('Save'),
-            ),
-          ],
+                    ],
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+              TextField(
+                controller: _weightCtrl,
+                decoration: const InputDecoration(labelText: 'Weight (kg)'),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              DropdownButtonFormField<String>(
+                value: _gender,
+                items: const [
+                  DropdownMenuItem(value: 'Male', child: Text('Male')),
+                  DropdownMenuItem(value: 'Female', child: Text('Female')),
+                  DropdownMenuItem(value: 'Unknown', child: Text('Unknown')),
+                ],
+                onChanged: (v) => setState(() => _gender = v),
+                decoration: const InputDecoration(labelText: 'Gender'),
+              ),
+
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _saving ? null : _save,
+                icon: const Icon(Icons.save),
+                label: const Text('Save'),
+              ),
+            ],
+          ),
         ),
       ),
     );
