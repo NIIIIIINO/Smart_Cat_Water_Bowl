@@ -25,6 +25,7 @@ class _EditCatPageState extends State<EditCatPage> {
   void initState() {
     super.initState();
     final d = widget.data;
+
     _nameCtrl = TextEditingController(text: d['name'] ?? '');
     _ageTextCtrl = TextEditingController(text: d['ageText'] ?? '');
     _weightCtrl = TextEditingController(text: d['weight']?.toString() ?? '');
@@ -37,6 +38,7 @@ class _EditCatPageState extends State<EditCatPage> {
     } else if (bd is DateTime) {
       birth = bd;
     }
+
     if (birth != null) {
       _day = birth.day;
       _month = birth.month;
@@ -72,17 +74,6 @@ class _EditCatPageState extends State<EditCatPage> {
     _ageTextCtrl.text = ageText;
   }
 
-  int _ageYearsFromBirthDate(DateTime birthDate) {
-    final today = DateTime.now();
-    int years = today.year - birthDate.year;
-    if (today.month < birthDate.month ||
-        (today.month == birthDate.month && today.day < birthDate.day)) {
-      years--;
-    }
-    if (years < 0) years = 0;
-    return years;
-  }
-
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -94,7 +85,10 @@ class _EditCatPageState extends State<EditCatPage> {
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();
     final ageText = _ageTextCtrl.text.trim();
-    final weight = double.tryParse(_weightCtrl.text.trim());
+
+    // ถ้าไม่กรอกน้ำหนัก ให้เก็บเป็น null
+    final weightRaw = _weightCtrl.text.trim();
+    final weight = weightRaw.isEmpty ? null : double.tryParse(weightRaw);
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(
@@ -113,10 +107,12 @@ class _EditCatPageState extends State<EditCatPage> {
     final birthDate = DateTime(_year!, _month!, _day!);
 
     setState(() => _saving = true);
+
     try {
       final ref = FirebaseFirestore.instance
           .collection('cats')
           .doc(widget.docId);
+
       await ref.update({
         'name': name,
         'ageText': ageText,
@@ -124,7 +120,9 @@ class _EditCatPageState extends State<EditCatPage> {
         'weight': weight,
         'gender': _gender,
       });
-      Navigator.of(context).pop(true);
+
+      // ✅ กลับไปหน้า CatDetailPage พร้อมส่งผลว่า "updated"
+      Navigator.pop(context, 'updated');
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -154,15 +152,20 @@ class _EditCatPageState extends State<EditCatPage> {
         ],
       ),
     );
+
     if (ok != true) return;
 
     setState(() => _saving = true);
+
     try {
       final ref = FirebaseFirestore.instance
           .collection('cats')
           .doc(widget.docId);
+
       await ref.delete();
-      Navigator.of(context).pop(true);
+
+      // ✅ บอก CatDetailPage ว่าลบแล้ว
+      Navigator.pop(context, 'deleted');
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -179,12 +182,12 @@ class _EditCatPageState extends State<EditCatPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
-          backgroundColor: const Color(0xFFFFD6E8), // ชมพูพาสเทล
+          backgroundColor: const Color(0xFFFFD6E8),
           elevation: 0,
           iconTheme: const IconThemeData(color: Color(0xFF5C4033)),
-          title: Text(
+          title: const Text(
             'Edit Cat',
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Lobster',
               fontSize: 30,
               fontWeight: FontWeight.w700,
@@ -195,6 +198,8 @@ class _EditCatPageState extends State<EditCatPage> {
             IconButton(
               tooltip: 'Delete',
               icon: const Icon(Icons.delete_outline),
+              iconSize: 30,
+              padding: const EdgeInsets.all(12),
               onPressed: _saving ? null : _delete,
             ),
           ],
@@ -205,12 +210,9 @@ class _EditCatPageState extends State<EditCatPage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92), // พื้นหลังในกรอบ
-            borderRadius: BorderRadius.circular(16), // โค้งมนทั้งกรอบ
-            border: Border.all(
-              color: const Color.fromARGB(255, 255, 255, 255), // สีขอบ
-              width: 2,
-            ),
+            color: Colors.white.withOpacity(0.92),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
                 blurRadius: 14,
@@ -232,7 +234,6 @@ class _EditCatPageState extends State<EditCatPage> {
                 decoration: const InputDecoration(labelText: 'Age (Auto: Y/M)'),
               ),
               const SizedBox(height: 12),
-
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -241,12 +242,12 @@ class _EditCatPageState extends State<EditCatPage> {
                 ),
               ),
               const SizedBox(height: 8),
-
               Builder(
                 builder: (context) {
                   final currentYear = DateTime.now().year;
                   final years = List<int>.generate(26, (i) => currentYear - i);
                   final months = List<int>.generate(12, (i) => i + 1);
+
                   final safeYear = _year ?? currentYear;
                   final safeMonth = _month ?? 1;
                   final maxDay = _daysInMonth(safeYear, safeMonth);
@@ -324,7 +325,6 @@ class _EditCatPageState extends State<EditCatPage> {
                 },
               ),
               const SizedBox(height: 12),
-
               TextField(
                 controller: _weightCtrl,
                 decoration: const InputDecoration(labelText: 'Weight (kg)'),
@@ -333,7 +333,6 @@ class _EditCatPageState extends State<EditCatPage> {
                 ),
               ),
               const SizedBox(height: 12),
-
               DropdownButtonFormField<String>(
                 value: _gender,
                 items: const [
@@ -344,9 +343,7 @@ class _EditCatPageState extends State<EditCatPage> {
                 onChanged: (v) => setState(() => _gender = v),
                 decoration: const InputDecoration(labelText: 'Gender'),
               ),
-
               const SizedBox(height: 30),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -362,10 +359,16 @@ class _EditCatPageState extends State<EditCatPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  icon: const Icon(Icons.save),
-                  label: const Text(
-                    'Save',
-                    style: TextStyle(
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(
+                    _saving ? 'Saving...' : 'Save',
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'MontserratAlternates',
