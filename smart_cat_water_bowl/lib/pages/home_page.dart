@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'cat_detail_page.dart';
 import 'notifications_page.dart';
+import 'live_camera_preview.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -138,18 +139,7 @@ class HomePage extends StatelessWidget {
             ),
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Live feed placeholder',
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ),
-              ),
+              child: const LiveCameraPreview(),
             ),
           ),
 
