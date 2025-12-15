@@ -259,7 +259,6 @@ class _InformationPageState extends State<InformationPage> {
       await docRef.set({
         'name': name,
         'gender': _gender,
-        'age': ageYears,
         'ageText': ageText,
         'birthDate': Timestamp.fromDate(birthDate),
         'weight': weight,
