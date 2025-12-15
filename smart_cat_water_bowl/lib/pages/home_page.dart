@@ -243,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           CircleAvatar(
-                            radius: 36,
+                            radius: 50,
                             backgroundColor: Colors.grey[200],
                             backgroundImage: profile != null
                                 ? NetworkImage(profile)
@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                             child: profile == null
                                 ? const Icon(
                                     Icons.pets,
-                                    size: 32,
+                                    size: 40,
                                     color: Colors.grey,
                                   )
                                 : null,
@@ -261,8 +261,9 @@ class _HomePageState extends State<HomePage> {
                             name,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 20,
                               fontWeight: FontWeight.w600,
+                              color: Color(0xFF5C4033),
                             ),
                           ),
                         ],
