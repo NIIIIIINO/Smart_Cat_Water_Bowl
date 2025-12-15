@@ -96,6 +96,18 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
 
+                  const SizedBox(height: 10),
+
+                  const Text(
+                    'Please Join Us',
+                    style: TextStyle(
+                      fontFamily: 'MontserratAlternates',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF5C4033),
+                    ),
+                  ),
+
                   const SizedBox(height: 24),
 
                   TextField(
