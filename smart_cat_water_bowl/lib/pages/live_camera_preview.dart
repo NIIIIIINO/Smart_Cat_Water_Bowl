@@ -41,6 +41,7 @@ class _LiveCameraPreviewState extends State<LiveCameraPreview> {
 
   @override
   void dispose() {
+    // 🔥 ปิดกล้องจริง
     _controller?.dispose();
     super.dispose();
   }

@@ -5,13 +5,28 @@ import 'cat_detail_page.dart';
 import 'notifications_page.dart';
 import 'live_camera_preview.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool isCameraOn = false; // 🔴 กล้องปิดเป็นค่าเริ่มต้น
+
+  @override
+  void dispose() {
+    // ✅ ปิดกล้องอัตโนมัติเมื่อออกจากหน้า Home
+    isCameraOn = false;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     print('DEBUG UID = $uid');
+
     final query = FirebaseFirestore.instance
         .collection('cats')
         .where('ownerUid', isEqualTo: uid)
@@ -23,7 +38,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -41,7 +56,6 @@ class HomePage extends StatelessWidget {
           ),
         ),
         actions: [
-          // Notifications button with unread count badge
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notifications')
@@ -49,14 +63,14 @@ class HomePage extends StatelessWidget {
                 .where('seen', isEqualTo: false)
                 .snapshots(),
             builder: (context, snap) {
-              final unread = (snap.hasData) ? snap.data!.docs.length : 0;
+              final unread = snap.hasData ? snap.data!.docs.length : 0;
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     IconButton(
-                      tooltip: 'Notifications',
+                      icon: const Icon(Icons.notifications),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -65,7 +79,6 @@ class HomePage extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.notifications),
                     ),
                     if (unread > 0)
                       Positioned(
@@ -73,7 +86,7 @@ class HomePage extends StatelessWidget {
                         top: 8,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
                           ),
@@ -81,13 +94,11 @@ class HomePage extends StatelessWidget {
                             minWidth: 20,
                             minHeight: 20,
                           ),
-                          child: Center(
-                            child: Text(
-                              unread > 99 ? '99+' : unread.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                              ),
+                          child: Text(
+                            unread > 99 ? '99+' : unread.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
                             ),
                           ),
                         ),
@@ -129,21 +140,47 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+
       body: Column(
         children: [
-          // Live feed placeholder (will be replaced with camera stream)
+          // ===== Live Camera Section =====
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 8.0,
-            ),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: const LiveCameraPreview(),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: isCameraOn
+                      ? const LiveCameraPreview() // ✅ สร้างกล้องเฉพาะตอนเปิด
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.videocam_off,
+                              size: 60,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  icon: Icon(isCameraOn ? Icons.stop : Icons.videocam),
+                  label: Text(isCameraOn ? 'Close Camera' : 'Open Camera'),
+                  onPressed: () {
+                    setState(() {
+                      isCameraOn = !isCameraOn;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
 
-          // Header row with title and add button
+          // ===== Header =====
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -162,7 +199,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
 
-          // Cats grid
+          // ===== Cats Grid =====
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: query,
@@ -173,7 +210,9 @@ class HomePage extends StatelessWidget {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text('No cats yet'));
                 }
+
                 final docs = snapshot.data!.docs;
+
                 return GridView.builder(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -191,6 +230,7 @@ class HomePage extends StatelessWidget {
                     final data = doc.data() as Map<String, dynamic>;
                     final name = data['name'] ?? 'Unnamed';
                     final profile = data['profileImage'] as String?;
+
                     return GestureDetector(
                       onTap: () => Navigator.push(
                         context,
