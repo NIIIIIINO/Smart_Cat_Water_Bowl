@@ -1,11 +1,72 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'edit_cat_page.dart';
 
-class CatDetailPage extends StatelessWidget {
+class CatDetailPage extends StatefulWidget {
   final Map<String, dynamic> data;
   final String docId;
 
   const CatDetailPage({super.key, required this.data, required this.docId});
+
+  @override
+  State<CatDetailPage> createState() => _CatDetailPageState();
+}
+
+class _CatDetailPageState extends State<CatDetailPage> {
+  late Map<String, dynamic> data;
+
+  @override
+  void initState() {
+    super.initState();
+    data = Map<String, dynamic>.from(widget.data);
+  }
+
+  Future<void> _reloadCat() async {
+    final snap = await FirebaseFirestore.instance
+        .collection('cats')
+        .doc(widget.docId)
+        .get();
+
+    if (!mounted) return;
+
+    if (!snap.exists) {
+      // ถ้าโดนลบไปแล้ว
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This cat no longer exists')),
+      );
+      Navigator.pop(context, true);
+      return;
+    }
+
+    setState(() {
+      data = snap.data() as Map<String, dynamic>;
+    });
+  }
+
+  Future<void> _openEdit() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditCatPage(docId: widget.docId, data: data),
+      ),
+    );
+
+    // ✅ ถ้า save แล้วกลับมา ให้โหลดข้อมูลใหม่ แต่ “ไม่ pop ออก”
+    if (result == true || result == 'updated') {
+      await _reloadCat();
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Updated successfully')));
+    }
+
+    // ✅ ถ้าลบแล้ว (ในโค้ดคุณ delete pop(true) อยู่) ก็โหลดแล้วจะ detect ไม่ exists
+    // หรือถ้าคุณเปลี่ยนเป็น pop('deleted') ก็รองรับด้วย
+    if (result == 'deleted') {
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +82,6 @@ class CatDetailPage extends StatelessWidget {
     final images = (data['images'] as List?)?.cast<String>() ?? [];
 
     double computeAgeYears() {
-      // Use only ageText (e.g. '2 Y 3 M' or '3 M') to compute years
       try {
         final t = data['ageText']?.toUpperCase() ?? '';
         final yMatch = RegExp(r'(\d+)\s*Y').firstMatch(t);
@@ -34,7 +94,7 @@ class CatDetailPage extends StatelessWidget {
       }
     }
 
-    double ageYears = computeAgeYears();
+    final ageYears = computeAgeYears();
 
     double ageMultiplier(double years) {
       if (years < 1.0) return 1.2; // kittens
@@ -53,7 +113,7 @@ class CatDetailPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
-          backgroundColor: const Color(0xFFFFD6E8), // ชมพูพาสเทล
+          backgroundColor: const Color(0xFFFFD6E8),
           elevation: 0,
           iconTheme: const IconThemeData(color: Color(0xFF5C4033)),
           title: Text(
@@ -68,18 +128,11 @@ class CatDetailPage extends StatelessWidget {
           actions: [
             IconButton(
               tooltip: 'Edit',
+              iconSize: 30,
+              padding: const EdgeInsets.all(12),
               icon: const Icon(Icons.edit),
               color: const Color(0xFF5C4033),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditCatPage(docId: docId, data: data),
-                  ),
-                ).then((result) {
-                  if (result == true) Navigator.of(context).pop(true);
-                });
-              },
+              onPressed: _openEdit, // ✅ ใช้ฟังก์ชันใหม่
             ),
           ],
         ),
@@ -133,7 +186,6 @@ class CatDetailPage extends StatelessWidget {
               ),
             )
           else
-            // ✅ กรณีไม่มีรูป ก็ให้เป็นวงกลมเหมือนกัน
             Center(
               child: CircleAvatar(
                 radius: 90,
@@ -143,10 +195,9 @@ class CatDetailPage extends StatelessWidget {
             ),
 
           const SizedBox(height: 16),
+
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-            ), // ✅ ย่อหน้าเท่ากับใน Card
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -172,6 +223,7 @@ class CatDetailPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 25),
+
           Card(
             elevation: 0,
             color: Colors.white,
@@ -215,7 +267,7 @@ class CatDetailPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 25),
-          // Weekly intake mockup chart
+
           Card(
             elevation: 0,
             child: Padding(
@@ -344,12 +396,6 @@ class CatDetailPage extends StatelessWidget {
               ),
             ),
           ),
-
-          //const SizedBox(height: 16),
-          //Text(
-          // 'Document ID: $docId',
-          //style: const TextStyle(fontSize: 12, color: Colors.grey),
-          //),
         ],
       ),
     );
