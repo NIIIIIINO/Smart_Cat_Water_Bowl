@@ -10,12 +10,14 @@ class CatDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = data['name'] ?? 'Unnamed';
+
     final weightVal = data['weight'];
     final weight = weightVal != null
         ? (weightVal is num
               ? weightVal.toDouble()
               : double.tryParse(weightVal.toString()))
         : null;
+
     final images = (data['images'] as List?)?.cast<String>() ?? [];
 
     double computeAgeYears() {
@@ -48,70 +50,128 @@ class CatDetailPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFFAF3DD), Color(0xFFF7F6A3)],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: AppBar(
+          backgroundColor: const Color(0xFFFFD6E8), // ชมพูพาสเทล
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Color(0xFF5C4033)),
+          title: Text(
+            name,
+            style: const TextStyle(
+              fontFamily: 'Lobster',
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF5C4033),
             ),
           ),
+          actions: [
+            IconButton(
+              tooltip: 'Edit',
+              icon: const Icon(Icons.edit),
+              color: const Color(0xFF5C4033),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditCatPage(docId: docId, data: data),
+                  ),
+                ).then((result) {
+                  if (result == true) Navigator.of(context).pop(true);
+                });
+              },
+            ),
+          ],
         ),
-        title: Text(name),
-        actions: [
-          IconButton(
-            tooltip: 'Edit',
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditCatPage(docId: docId, data: data),
-                ),
-              ).then((result) {
-                // if edit or delete happened, pop detail so home will refresh
-                if (result == true) Navigator.of(context).pop(true);
-              });
-            },
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ✅ รูปแมวแบบวงกลม (เลื่อนได้หลายรูป)
           if (images.isNotEmpty)
             SizedBox(
-              height: 300,
+              height: 260,
               child: PageView.builder(
                 itemCount: images.length,
-                itemBuilder: (context, idx) =>
-                    Image.network(images[idx], fit: BoxFit.cover),
+                itemBuilder: (context, idx) {
+                  return Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.network(
+                          images[idx],
+                          width: 220,
+                          height: 220,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stack) {
+                            return Container(
+                              width: 220,
+                              height: 220,
+                              color: Colors.grey[200],
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.pets,
+                                size: 80,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             )
           else
-            Container(
-              height: 200,
-              color: Colors.grey[200],
-              child: const Icon(Icons.pets, size: 80, color: Colors.grey),
+            // ✅ กรณีไม่มีรูป ก็ให้เป็นวงกลมเหมือนกัน
+            Center(
+              child: CircleAvatar(
+                radius: 90,
+                backgroundColor: Colors.grey[200],
+                child: const Icon(Icons.pets, size: 80, color: Colors.grey),
+              ),
             ),
 
           const SizedBox(height: 16),
-          Text(
-            'Name: $name',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+            ), // ✅ ย่อหน้าเท่ากับใน Card
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Name: $name',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Age: ${data['ageText'] ?? '-'}',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Weight: ${weight != null ? weight.toStringAsFixed(1) : '-'} kg',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Age: ${data['ageText'] ?? '-'}',
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Weight: ${weight != null ? weight.toStringAsFixed(1) : '-'} kg',
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 12),
+
+          const SizedBox(height: 25),
           Card(
             elevation: 0,
             color: Colors.white,
@@ -131,17 +191,18 @@ class CatDetailPage extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
+                        color: Color.fromARGB(255, 219, 113, 113),
                       ),
-                    ),
-                  if (recommendedMl == null)
+                    )
+                  else
                     const Text(
                       'Weight not available to calculate',
                       style: TextStyle(color: Colors.black54),
                     ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Formula: weight(kg) × 50 × age multiplier',
-                    style: const TextStyle(color: Colors.black54),
+                    style: TextStyle(color: Colors.black54),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -152,7 +213,8 @@ class CatDetailPage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+
+          const SizedBox(height: 25),
           // Weekly intake mockup chart
           Card(
             elevation: 0,
@@ -177,10 +239,12 @@ class CatDetailPage extends StatelessWidget {
                         1.1,
                         0.95,
                       ];
+
                       final List<int> values = [];
                       if (recommendedMl != null) {
-                        for (var m in multipliers)
+                        for (var m in multipliers) {
                           values.add((recommendedMl * m).round());
+                        }
                       } else {
                         values.addAll([150, 180, 200, 170, 140, 220, 190]);
                       }
@@ -188,7 +252,8 @@ class CatDetailPage extends StatelessWidget {
                       final maxVal = values
                           .reduce((a, b) => a > b ? a : b)
                           .toDouble();
-                      final days = [
+
+                      final days = const [
                         'Mon',
                         'Tue',
                         'Wed',
@@ -212,7 +277,7 @@ class CatDetailPage extends StatelessWidget {
                                     Expanded(
                                       child: Container(
                                         height: 1,
-                                        color: Colors.green.shade700,
+                                        color: Colors.green,
                                       ),
                                     ),
                                   ],
@@ -228,6 +293,7 @@ class CatDetailPage extends StatelessWidget {
                                   final h = maxVal > 0
                                       ? (values[i] / maxVal) * 100.0
                                       : 0.0;
+
                                   return Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -235,7 +301,12 @@ class CatDetailPage extends StatelessWidget {
                                         width: 22,
                                         height: h + 20,
                                         decoration: BoxDecoration(
-                                          color: Colors.blue.shade300,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            134,
+                                            195,
+                                            245,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             6,
                                           ),
@@ -273,11 +344,12 @@ class CatDetailPage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Document ID: $docId',
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
+
+          //const SizedBox(height: 16),
+          //Text(
+          // 'Document ID: $docId',
+          //style: const TextStyle(fontSize: 12, color: Colors.grey),
+          //),
         ],
       ),
     );
