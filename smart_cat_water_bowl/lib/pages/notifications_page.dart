@@ -30,7 +30,7 @@ class NotificationsPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
-          backgroundColor: _appBarColor,
+          backgroundColor: Color(0xFFFFC9E8),
           elevation: 0,
           centerTitle: true,
           title: const Text(
@@ -39,7 +39,7 @@ class NotificationsPage extends StatelessWidget {
               fontFamily: 'Lobster',
               fontSize: 30,
               fontWeight: FontWeight.w700,
-              color: _titleColor,
+              color: Color(0xFF5C4033),
             ),
           ),
         ),
@@ -53,7 +53,7 @@ class NotificationsPage extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'MontserratAlternates',
                     fontWeight: FontWeight.w600,
-                    color: _titleColor,
+                    color: Color(0xFF5C4033),
                   ),
                 ),
               )
@@ -71,7 +71,7 @@ class NotificationsPage extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'MontserratAlternates',
                           fontWeight: FontWeight.w600,
-                          color: _titleColor,
+                          color: Color(0xFF5C4033),
                         ),
                       ),
                     );
@@ -123,7 +123,7 @@ class NotificationsPage extends StatelessWidget {
                               fontWeight: seen
                                   ? FontWeight.w600
                                   : FontWeight.w800,
-                              color: _titleColor,
+                              color: Color(0xFF5C4033),
                             ),
                           ),
                           subtitle: Text(
