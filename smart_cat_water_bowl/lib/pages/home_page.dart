@@ -20,6 +20,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -129,6 +130,30 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
         children: [
+          // Live feed placeholder (will be replaced with camera stream)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 8.0,
+            ),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Live feed placeholder',
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Header row with title and add button
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -138,21 +163,20 @@ class HomePage extends StatelessWidget {
                   'My Cats',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () => Navigator.pushNamed(context, '/info'),
-                  child: const Text('Add Cat Info'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Cat'),
                 ),
               ],
             ),
           ),
+
+          // Cats grid
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: query,
               builder: (context, snapshot) {
-                print('--- STREAM BUILDER ---');
-                print('connectionState = ${snapshot.connectionState}');
-                print('hasData = ${snapshot.hasData}');
-                print('doc count = ${snapshot.data?.docs.length}');
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -160,48 +184,59 @@ class HomePage extends StatelessWidget {
                   return const Center(child: Text('No cats yet'));
                 }
                 final docs = snapshot.data!.docs;
-                return ListView.builder(
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.8,
+                  ),
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
                     final name = data['name'] ?? 'Unnamed';
-                    final images =
-                        (data['images'] as List?)?.cast<String>() ?? [];
-                    final thumb = images.isNotEmpty ? images.first : null;
-                    return ListTile(
-                      leading: thumb != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Image.network(
-                                thumb,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Icon(Icons.pets, color: Colors.grey),
-                            ),
-                      title: Text(name),
-                      subtitle: images.isNotEmpty
-                          ? Text('${images.length} image(s)')
-                          : null,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                CatDetailPage(data: data, docId: doc.id),
+                    final profile = data['profileImage'] as String?;
+                    return GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CatDetailPage(data: data, docId: doc.id),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 36,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: profile != null
+                                ? NetworkImage(profile)
+                                : null,
+                            child: profile == null
+                                ? const Icon(
+                                    Icons.pets,
+                                    size: 32,
+                                    color: Colors.grey,
+                                  )
+                                : null,
                           ),
-                        );
-                      },
+                          const SizedBox(height: 8),
+                          Text(
+                            name,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );
