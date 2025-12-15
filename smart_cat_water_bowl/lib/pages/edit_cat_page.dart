@@ -15,17 +15,11 @@ class _EditCatPageState extends State<EditCatPage> {
   late TextEditingController _nameCtrl;
   late TextEditingController _ageTextCtrl;
   late TextEditingController _weightCtrl;
-
   String? _gender;
   int? _day;
   int? _month;
   int? _year;
   bool _saving = false;
-
-  // ✅ ธีมสีเดียวกับหน้าที่แล้ว
-  static const _bgTop = Color(0xFFFAF3DD);
-  static const _bgBottom = Color(0xFFF7F6A3);
-  static const _textBrown = Color(0xFF5C4033);
 
   @override
   void initState() {
@@ -36,7 +30,6 @@ class _EditCatPageState extends State<EditCatPage> {
     _weightCtrl = TextEditingController(text: d['weight']?.toString() ?? '');
     _gender = d['gender'] as String?;
 
-    // initialize birth date if present
     final bd = d['birthDate'];
     DateTime? birth;
     if (bd is Timestamp) {
@@ -52,14 +45,12 @@ class _EditCatPageState extends State<EditCatPage> {
     }
   }
 
-  // helper: days in month
   int _daysInMonth(int year, int month) {
     final firstDayThisMonth = DateTime(year, month, 1);
     final firstDayNextMonth = DateTime(year, month + 1, 1);
     return firstDayNextMonth.difference(firstDayThisMonth).inDays;
   }
 
-  // update ageText from birth fields
   void _updateAgeFromBirthDate() {
     if (_day == null || _month == null || _year == null) return;
 
@@ -79,6 +70,17 @@ class _EditCatPageState extends State<EditCatPage> {
     ageText += '$months M';
 
     _ageTextCtrl.text = ageText;
+  }
+
+  int _ageYearsFromBirthDate(DateTime birthDate) {
+    final today = DateTime.now();
+    int years = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      years--;
+    }
+    if (years < 0) years = 0;
+    return years;
   }
 
   @override
@@ -122,7 +124,7 @@ class _EditCatPageState extends State<EditCatPage> {
         'weight': weight,
         'gender': _gender,
       });
-      if (mounted) Navigator.of(context).pop(true);
+      Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -152,7 +154,6 @@ class _EditCatPageState extends State<EditCatPage> {
         ],
       ),
     );
-
     if (ok != true) return;
 
     setState(() => _saving = true);
@@ -161,7 +162,7 @@ class _EditCatPageState extends State<EditCatPage> {
           .collection('cats')
           .doc(widget.docId);
       await ref.delete();
-      if (mounted) Navigator.of(context).pop(true);
+      Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -175,50 +176,49 @@ class _EditCatPageState extends State<EditCatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-
-      // ✅ AppBar สีเหมือนหน้าที่แล้ว
-      appBar: AppBar(
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: _textBrown),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [_bgTop, _bgBottom],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: AppBar(
+          backgroundColor: const Color(0xFFFFD6E8), // ชมพูพาสเทล
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Color(0xFF5C4033)),
+          title: Text(
+            'Edit Cat',
+            style: const TextStyle(
+              fontFamily: 'Lobster',
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF5C4033),
             ),
           ),
+          actions: [
+            IconButton(
+              tooltip: 'Delete',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _saving ? null : _delete,
+            ),
+          ],
         ),
-        title: const Text(
-          'Edit Cat',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 22,
-            color: _textBrown,
-            // fontFamily: 'MontserratAlternates',
-          ),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Delete',
-            icon: const Icon(Icons.delete_outline),
-            color: Colors.red,
-            onPressed: _saving ? null : _delete,
-          ),
-        ],
       ),
-
-      // ✅ พื้นหลัง body สีเหมือนหน้าที่แล้ว
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_bgTop, _bgBottom],
-          ),
-        ),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.92), // พื้นหลังในกรอบ
+            borderRadius: BorderRadius.circular(16), // โค้งมนทั้งกรอบ
+            border: Border.all(
+              color: const Color.fromARGB(255, 255, 255, 255), // สีขอบ
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+                color: Colors.black.withOpacity(0.10),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               TextField(
@@ -226,7 +226,6 @@ class _EditCatPageState extends State<EditCatPage> {
                 decoration: const InputDecoration(labelText: 'Name'),
               ),
               const SizedBox(height: 12),
-
               TextField(
                 controller: _ageTextCtrl,
                 readOnly: true,
@@ -248,7 +247,6 @@ class _EditCatPageState extends State<EditCatPage> {
                   final currentYear = DateTime.now().year;
                   final years = List<int>.generate(26, (i) => currentYear - i);
                   final months = List<int>.generate(12, (i) => i + 1);
-
                   final safeYear = _year ?? currentYear;
                   final safeMonth = _month ?? 1;
                   final maxDay = _daysInMonth(safeYear, safeMonth);
@@ -325,8 +323,8 @@ class _EditCatPageState extends State<EditCatPage> {
                   );
                 },
               ),
-
               const SizedBox(height: 12),
+
               TextField(
                 controller: _weightCtrl,
                 decoration: const InputDecoration(labelText: 'Weight (kg)'),
@@ -347,11 +345,33 @@ class _EditCatPageState extends State<EditCatPage> {
                 decoration: const InputDecoration(labelText: 'Gender'),
               ),
 
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _saving ? null : _save,
-                icon: const Icon(Icons.save),
-                label: const Text('Save'),
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _saving ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB1CCBB),
+                    foregroundColor: const Color(0xFF5C4033),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 11,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.save),
+                  label: const Text(
+                    'Save',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'MontserratAlternates',
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
