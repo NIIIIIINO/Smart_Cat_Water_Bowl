@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'edit_cat_page.dart';
 
 class CatDetailPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -58,6 +59,23 @@ class CatDetailPage extends StatelessWidget {
           ),
         ),
         title: Text(name),
+        actions: [
+          IconButton(
+            tooltip: 'Edit',
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditCatPage(docId: docId, data: data),
+                ),
+              ).then((result) {
+                // if edit or delete happened, pop detail so home will refresh
+                if (result == true) Navigator.of(context).pop(true);
+              });
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
