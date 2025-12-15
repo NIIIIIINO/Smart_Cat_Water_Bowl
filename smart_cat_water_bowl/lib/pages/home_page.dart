@@ -10,6 +10,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    print('DEBUG UID = $uid');
     final query = FirebaseFirestore.instance
         .collection('cats')
         .where('ownerUid', isEqualTo: uid)
@@ -24,7 +25,7 @@ class HomePage extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFF7F6A3)],
+              colors: [Color(0xFFF7F6A3), Color(0xFFFAF3DD)],
             ),
           ),
         ),
@@ -148,6 +149,10 @@ class HomePage extends StatelessWidget {
             child: StreamBuilder<QuerySnapshot>(
               stream: query,
               builder: (context, snapshot) {
+                print('--- STREAM BUILDER ---');
+                print('connectionState = ${snapshot.connectionState}');
+                print('hasData = ${snapshot.hasData}');
+                print('doc count = ${snapshot.data?.docs.length}');
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
