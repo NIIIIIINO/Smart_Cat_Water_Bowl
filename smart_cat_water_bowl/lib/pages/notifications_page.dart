@@ -192,6 +192,82 @@ class NotificationsPage extends StatelessWidget {
                 },
               ),
       ),
+      floatingActionButton: uid == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () async {
+                // create a mock notification: find one of the user's cats (if any)
+                try {
+                  final q = await FirebaseFirestore.instance
+                      .collection('cats')
+                      .where('ownerUid', isEqualTo: uid)
+                      .limit(1)
+                      .get();
+
+                  String catName = 'Your cat';
+                  if (q.docs.isNotEmpty) {
+                    final d = q.docs.first.data();
+                    catName = (d['name'] ?? 'Your cat').toString();
+                  }
+
+                  final now = DateTime.now();
+                  final title = '$catName drank water';
+                  final message =
+                      '$catName drank water at ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}.';
+
+                  await FirebaseFirestore.instance
+                      .collection('notifications')
+                      .add({
+                        'ownerUid': uid,
+                        'title': title,
+                        'message': message,
+                        'seen': false,
+                        'createdAt': FieldValue.serverTimestamp(),
+                      });
+
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Notification created')),
+                  );
+
+                  // show details immediately
+                  showDialog<void>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(
+                        title,
+                        style: const TextStyle(
+                          fontFamily: 'MontserratAlternates',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      content: Text(
+                        message,
+                        style: const TextStyle(
+                          fontFamily: 'MontserratAlternates',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  );
+                } catch (e) {
+                  if (context.mounted)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to create notification: $e'),
+                      ),
+                    );
+                }
+              },
+              label: const Text('Add Noti'),
+              icon: const Icon(Icons.add_alert),
+            ),
     );
   }
 }
