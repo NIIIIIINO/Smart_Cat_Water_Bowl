@@ -1,0 +1,9 @@
+{
+  "device_id": "raspi-01",
+  "trig_pin": 23,
+  "echo_pin": 24,
+  "max_distance_cm": 20,
+  "collection": "water_levels",
+  "interval": 60,
+  "mock": false
+}

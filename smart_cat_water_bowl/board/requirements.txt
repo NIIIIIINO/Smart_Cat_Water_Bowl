@@ -1,0 +1,2 @@
+google-cloud-firestore>=2.10.0
+RPi.GPIO==0.7.0
