@@ -8,6 +8,7 @@ import json
 import logging
 import signal
 import sys
+import os
 from datetime import datetime
 
 from sensor import HCSR04Sensor, MockSensor, level_percent_from_distance
@@ -38,7 +39,14 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     cfg = load_config(args.config)
-    device_id = cfg.get("device_id", "raspi-unknown")
+    device_id = cfg.get("device_id")
+    # if no device id configured, generate and persist a per-board id
+    if not device_id or device_id == "raspi-unknown":
+        try:
+            from device import get_or_create_device_id
+            device_id = get_or_create_device_id()
+        except Exception:
+            device_id = f"raspi-{os.uname().nodename if hasattr(os, 'uname') else 'unknown'}"
     trig = cfg.get("trig_pin", 23)
     echo = cfg.get("echo_pin", 24)
     max_distance = cfg.get("max_distance_cm", 20)

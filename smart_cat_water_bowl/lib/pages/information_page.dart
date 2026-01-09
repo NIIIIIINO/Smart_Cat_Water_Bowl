@@ -172,20 +172,32 @@ class _InformationPageState extends State<InformationPage> {
 
   Future<List<String>> _uploadImages(String catId) async {
     final List<String> urls = [];
-    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      debugPrint('❌ No user logged in');
+      return urls;
+    }
 
     for (var i = 0; i < _picked.length; i++) {
       try {
         final file = File(_picked[i].path);
+
         final ref = FirebaseStorage.instance.ref().child(
-          'cats/$uid/$catId/${DateTime.now().millisecondsSinceEpoch}_$i.jpg',
+          'cats/$uid/$catId/image_$i.jpg',
         );
 
-        final snapshot = await ref.putFile(file).whenComplete(() {});
+        debugPrint('⬆️ Uploading: cats/$uid/$catId/image_$i.jpg');
+
+        final snapshot = await ref.putFile(
+          file,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+
         final url = await snapshot.ref.getDownloadURL();
         urls.add(url);
       } catch (e) {
-        debugPrint('upload image error: $e');
+        debugPrint('❌ upload image error: $e');
       }
     }
     return urls;
@@ -194,18 +206,29 @@ class _InformationPageState extends State<InformationPage> {
   Future<String?> _uploadProfileImage(String catId) async {
     if (_profileImage == null) return null;
 
-    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      debugPrint('❌ No user logged in');
+      return null;
+    }
 
     try {
       final file = File(_profileImage!.path);
+
       final ref = FirebaseStorage.instance.ref().child(
-        'cats/$uid/$catId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        'cats/$uid/$catId/profile.jpg',
       );
 
-      final snapshot = await ref.putFile(file).whenComplete(() {});
+      debugPrint('⬆️ Uploading profile image');
+
+      final snapshot = await ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      debugPrint('upload profile error: $e');
+      debugPrint('❌ upload profile error: $e');
       return null;
     }
   }
@@ -267,6 +290,20 @@ class _InformationPageState extends State<InformationPage> {
         'ownerUid': ownerUid,
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      // Add training task for backend AI: store image URLs and profile for processing
+      try {
+        await FirebaseFirestore.instance.collection('ai_training_queue').add({
+          'catId': catId,
+          'ownerUid': ownerUid,
+          'images': imageUrls,
+          'profileImage': profileUrl,
+          'status': 'pending',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        debugPrint('Failed to queue AI training task: $e');
+      }
 
       ScaffoldMessenger.of(
         context,

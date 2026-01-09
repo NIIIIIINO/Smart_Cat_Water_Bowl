@@ -80,6 +80,11 @@ class _CatDetailPageState extends State<CatDetailPage> {
         : null;
 
     final images = (data['images'] as List?)?.cast<String>() ?? [];
+    final profile = data['profileImage'] as String?;
+    // display profile first (if available), then other images
+    final displayImages = <String>[];
+    if (profile != null && profile.isNotEmpty) displayImages.add(profile);
+    displayImages.addAll(images);
 
     double computeAgeYears() {
       try {
@@ -140,12 +145,12 @@ class _CatDetailPageState extends State<CatDetailPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // ✅ รูปแมวแบบวงกลม (เลื่อนได้หลายรูป)
-          if (images.isNotEmpty)
+          // ✅ รูปโปรไฟล์: แสดงรูปที่เลือกเป็น profileImage เป็นหลัก
+          if (displayImages.isNotEmpty)
             SizedBox(
               height: 260,
               child: PageView.builder(
-                itemCount: images.length,
+                itemCount: displayImages.length,
                 itemBuilder: (context, idx) {
                   return Center(
                     child: Container(
@@ -161,7 +166,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
                       ),
                       child: ClipOval(
                         child: Image.network(
-                          images[idx],
+                          displayImages[idx],
                           width: 220,
                           height: 220,
                           fit: BoxFit.cover,

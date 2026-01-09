@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditCatPage extends StatefulWidget {
   final String docId;
@@ -20,6 +25,8 @@ class _EditCatPageState extends State<EditCatPage> {
   int? _month;
   int? _year;
   bool _saving = false;
+  XFile? _profileImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -45,6 +52,9 @@ class _EditCatPageState extends State<EditCatPage> {
       _year = birth.year;
       _updateAgeFromBirthDate();
     }
+
+    // keep existing profile in state? we only store a local picked file
+    // existing remote profile url is in widget.data['profileImage']
   }
 
   int _daysInMonth(int year, int month) {
@@ -113,12 +123,18 @@ class _EditCatPageState extends State<EditCatPage> {
           .collection('cats')
           .doc(widget.docId);
 
+      String? profileUrl;
+      if (_profileImage != null) {
+        profileUrl = await _uploadProfileImage(widget.docId);
+      }
+
       await ref.update({
         'name': name,
         'ageText': ageText,
         'birthDate': Timestamp.fromDate(birthDate),
         'weight': weight,
         'gender': _gender,
+        if (profileUrl != null) 'profileImage': profileUrl,
       });
 
       // ✅ กลับไปหน้า CatDetailPage พร้อมส่งผลว่า "updated"
@@ -175,6 +191,42 @@ class _EditCatPageState extends State<EditCatPage> {
     }
   }
 
+  Future<void> _pickProfileImage() async {
+    try {
+      final XFile? img = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (img == null) return;
+      setState(() => _profileImage = img);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot pick profile image')),
+      );
+    }
+  }
+
+  Future<String?> _uploadProfileImage(String catId) async {
+    if (_profileImage == null) return null;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
+
+    try {
+      final file = File(_profileImage!.path);
+      final ref = FirebaseStorage.instance.ref().child(
+        'cats/$uid/$catId/profile.jpg',
+      );
+      final snapshot = await ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      debugPrint('upload profile failed: $e');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,6 +278,32 @@ class _EditCatPageState extends State<EditCatPage> {
               TextField(
                 controller: _nameCtrl,
                 decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              const SizedBox(height: 12),
+              // Profile image preview + change
+              GestureDetector(
+                onTap: _pickProfileImage,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 36,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: _profileImage != null
+                          ? FileImage(File(_profileImage!.path))
+                          : (widget.data['profileImage'] != null
+                                ? NetworkImage(widget.data['profileImage'])
+                                      as ImageProvider
+                                : null),
+                      child:
+                          (_profileImage == null &&
+                              widget.data['profileImage'] == null)
+                          ? const Icon(Icons.pets, size: 36, color: Colors.grey)
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Tap to change profile image'),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               TextField(

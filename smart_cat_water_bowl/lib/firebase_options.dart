@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'smart-cat-water-bowl.firebasestorage.app',
     measurementId: 'G-2NXFGKQ7ZM',
   );
-
 }

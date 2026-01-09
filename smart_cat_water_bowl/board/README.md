@@ -53,3 +53,9 @@ Firestore
 
 Customization
 - Edit `board/config_example.json` to change pins, collection name, interval, device_id, or mock mode.
+
+Device ID
+ - On first run the board will generate and persist a device id in `board/device_id.txt` if `device_id` is not set in the config.
+ - The runner includes the `device_id` field in every Firestore document it writes. Use this id to bind device-specific data in your app and AI components.
+ - If you run AI or other services on the same machine, you can copy the contents of `board/device_id.txt` to `Ai/device_id.txt` (or set the device id explicitly when running the scripts) so the board, AI and app use the same id.
+ - Example: after first boot the file contains `RASPI_ab12cd34`. Use that value when registering the device in your app or when scoping user data in AI scripts.
