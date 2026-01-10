@@ -118,3 +118,4 @@ app.*.symbols
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
 smart_cat_water_bowl/board/smart-cat-water-bowl-firebase-adminsdk-fbsvc-8ae7ca925f.json
+smart_cat_water_bowl/secrets/smart-cat-water-bowl-firebase-adminsdk-fbsvc-8ae7ca925f.json

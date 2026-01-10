@@ -214,7 +214,7 @@ class _EditCatPageState extends State<EditCatPage> {
     try {
       final file = File(_profileImage!.path);
       final ref = FirebaseStorage.instance.ref().child(
-        'cats/$uid/$catId/profile.jpg',
+        'cats/$catId/profile.jpg',
       );
       final snapshot = await ref.putFile(
         file,

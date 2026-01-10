@@ -1,0 +1,108 @@
+{
+  "jlKU3Y86UTYVWwp5AwHY": {
+    "name": "jlKU3Y86UTYVWwp5AwHY",
+    "embeddings": [
+      "embeddings\\jlKU3Y86UTYVWwp5AwHY_1.npy",
+      "embeddings\\jlKU3Y86UTYVWwp5AwHY_2.npy"
+    ],
+    "training_images": [
+      "training_images\\jlKU3Y86UTYVWwp5AwHY_1.jpg",
+      "training_images\\jlKU3Y86UTYVWwp5AwHY_2.jpg"
+    ],
+    "profile": "training_images\\jlKU3Y86UTYVWwp5AwHY_profile.jpg"
+  },
+  "pZoidXSICnhIVmELaYX8": {
+    "name": "pZoidXSICnhIVmELaYX8",
+    "embeddings": [
+      "embeddings\\pZoidXSICnhIVmELaYX8_1.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_2.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_3.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_4.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_5.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_6.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_7.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_8.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_9.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_10.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_11.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_12.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_13.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_14.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_15.npy",
+      "embeddings\\pZoidXSICnhIVmELaYX8_16.npy"
+    ],
+    "training_images": [
+      "training_images\\pZoidXSICnhIVmELaYX8_1.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_2.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_3.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_4.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_5.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_6.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_7.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_8.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_9.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_10.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_11.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_12.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_13.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_14.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_15.jpg",
+      "training_images\\pZoidXSICnhIVmELaYX8_16.jpg"
+    ],
+    "profile": "training_images\\pZoidXSICnhIVmELaYX8_profile.jpg"
+  },
+  "LJIsbp2rURNjyyr6usZW": {
+    "name": "LJIsbp2rURNjyyr6usZW",
+    "embeddings": [
+      "embeddings\\LJIsbp2rURNjyyr6usZW_1.npy",
+      "embeddings\\LJIsbp2rURNjyyr6usZW_2.npy",
+      "embeddings\\LJIsbp2rURNjyyr6usZW_3.npy",
+      "embeddings\\LJIsbp2rURNjyyr6usZW_4.npy",
+      "embeddings\\LJIsbp2rURNjyyr6usZW_5.npy",
+      "embeddings\\LJIsbp2rURNjyyr6usZW_6.npy"
+    ],
+    "training_images": [
+      "training_images\\LJIsbp2rURNjyyr6usZW_1.jpg",
+      "training_images\\LJIsbp2rURNjyyr6usZW_2.jpg",
+      "training_images\\LJIsbp2rURNjyyr6usZW_3.jpg",
+      "training_images\\LJIsbp2rURNjyyr6usZW_4.jpg",
+      "training_images\\LJIsbp2rURNjyyr6usZW_5.jpg",
+      "training_images\\LJIsbp2rURNjyyr6usZW_6.jpg"
+    ],
+    "profile": "training_images\\LJIsbp2rURNjyyr6usZW_profile.jpg"
+  },
+  "avixJU9N99GhjzUZlVnt": {
+    "name": "avixJU9N99GhjzUZlVnt",
+    "embeddings": [
+      "embeddings\\avixJU9N99GhjzUZlVnt_1.npy"
+    ],
+    "training_images": [
+      "training_images\\avixJU9N99GhjzUZlVnt_1.jpg"
+    ],
+    "profile": "training_images\\avixJU9N99GhjzUZlVnt_profile.jpg"
+  },
+  "VKAwyRqYA1DjJbBDjbGL": {
+    "name": "VKAwyRqYA1DjJbBDjbGL",
+    "embeddings": [
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_1.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_2.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_3.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_4.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_5.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_6.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_7.npy",
+      "embeddings\\VKAwyRqYA1DjJbBDjbGL_8.npy"
+    ],
+    "training_images": [
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_1.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_2.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_3.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_4.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_5.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_6.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_7.jpg",
+      "training_images\\VKAwyRqYA1DjJbBDjbGL_8.jpg"
+    ],
+    "profile": "training_images\\VKAwyRqYA1DjJbBDjbGL_profile.jpg"
+  }
+}

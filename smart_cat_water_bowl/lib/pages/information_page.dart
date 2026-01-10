@@ -174,32 +174,23 @@ class _InformationPageState extends State<InformationPage> {
     final List<String> urls = [];
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    if (uid == null) {
-      debugPrint('❌ No user logged in');
-      return urls;
-    }
+    if (uid == null) return urls;
 
     for (var i = 0; i < _picked.length; i++) {
-      try {
-        final file = File(_picked[i].path);
+      final file = File(_picked[i].path);
 
-        final ref = FirebaseStorage.instance.ref().child(
-          'cats/$uid/$catId/image_$i.jpg',
-        );
+      final ref = FirebaseStorage.instance.ref().child(
+        'cats/$uid/$catId/image_$i.jpg', // ✅ FIX
+      );
 
-        debugPrint('⬆️ Uploading: cats/$uid/$catId/image_$i.jpg');
+      final snapshot = await ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
 
-        final snapshot = await ref.putFile(
-          file,
-          SettableMetadata(contentType: 'image/jpeg'),
-        );
-
-        final url = await snapshot.ref.getDownloadURL();
-        urls.add(url);
-      } catch (e) {
-        debugPrint('❌ upload image error: $e');
-      }
+      urls.add(await snapshot.ref.getDownloadURL());
     }
+
     return urls;
   }
 
@@ -207,30 +198,20 @@ class _InformationPageState extends State<InformationPage> {
     if (_profileImage == null) return null;
 
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      debugPrint('❌ No user logged in');
-      return null;
-    }
+    if (uid == null) return null;
 
-    try {
-      final file = File(_profileImage!.path);
+    final file = File(_profileImage!.path);
 
-      final ref = FirebaseStorage.instance.ref().child(
-        'cats/$uid/$catId/profile.jpg',
-      );
+    final ref = FirebaseStorage.instance.ref().child(
+      'cats/$uid/$catId/profile.jpg', // ✅ FIX
+    );
 
-      debugPrint('⬆️ Uploading profile image');
+    final snapshot = await ref.putFile(
+      file,
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
 
-      final snapshot = await ref.putFile(
-        file,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-
-      return await snapshot.ref.getDownloadURL();
-    } catch (e) {
-      debugPrint('❌ upload profile error: $e');
-      return null;
-    }
+    return await snapshot.ref.getDownloadURL();
   }
 
   Future<void> _saveCat() async {
