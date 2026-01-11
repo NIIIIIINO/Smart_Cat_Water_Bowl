@@ -20,15 +20,13 @@ model = YOLO(MODEL_PATH)
 # ---------- LOAD USER'S CAT EMBEDDINGS (UID = doc id) ----------
 def load_user_cats(user_id, device_id=None):
     """Load cat embeddings for a user and optional device.
-    If device_id provided, prefer device-specific metadata under
-    cat_db/users/{user_id}/devices/{device_id}/metadata.json
+    Return: { cat_uid: [emb1, emb2, ...] }
     """
     base_user = os.path.join(BASE_DB, user_id)
     device_db = None
     if device_id:
         device_db = os.path.join(base_user, "devices", device_id)
 
-    # prefer device metadata
     search_paths = []
     if device_db:
         search_paths.append(device_db)
@@ -61,21 +59,23 @@ def load_user_cats(user_id, device_id=None):
                         continue
 
             if embs:
-                cat_embeddings[cat_uid] = np.mean(embs, axis=0)
+                # ✅ เก็บเป็น list (ไม่ใช้ mean)
+                cat_embeddings[cat_uid] = embs
 
-        # if we found cats in device metadata, stop searching
         if cat_embeddings:
             break
 
     return cat_embeddings
 
 
-# ---------- IDENTIFY CAT ----------
+# ---------- IDENTIFY CAT (MAX SIMILARITY) ----------
 def identify_cat_by_uid(emb, cat_embeddings):
     best_score, best_cat_uid = 0.0, None
 
-    for cat_uid, ref_emb in cat_embeddings.items():
-        score = cosine_similarity([emb], [ref_emb])[0][0]
+    for cat_uid, ref_emb_list in cat_embeddings.items():
+        scores = cosine_similarity([emb], ref_emb_list)[0]
+        score = float(np.max(scores))  # ✅ ใช้ค่า max
+
         if score > best_score:
             best_score, best_cat_uid = score, cat_uid
 
@@ -87,9 +87,9 @@ def identify_cat_by_uid(emb, cat_embeddings):
 
 # ---------- TEST IMAGE ----------
 def test_image_for_user(user_id, image_path, device_id=None):
-    # resolve device id if not provided (persisted per machine)
     if device_id is None:
         device_id = get_or_create_device_id()
+
     cat_embeddings = load_user_cats(user_id, device_id=device_id)
 
     if not cat_embeddings:
@@ -105,7 +105,7 @@ def test_image_for_user(user_id, image_path, device_id=None):
 
     results = model(img, conf=0.4, verbose=False)
     found_cats = []
-    # prepare camera_images folder when device given
+
     device_db = None
     if device_id:
         device_db = os.path.join(BASE_DB, user_id, "devices", device_id)
@@ -127,16 +127,16 @@ def test_image_for_user(user_id, image_path, device_id=None):
             rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
             emb = get_embedding(rgb)
 
-            # save camera crop if device specified
+            cat_uid, confidence = identify_cat_by_uid(emb, cat_embeddings)
+
             if cam_dir:
                 ts = int(time.time() * 1000)
-                crop_name = f"crop_{cat_uid if 'cat_uid' in locals() and cat_uid else 'unknown'}_{ts}.jpg"
+                name = cat_uid if cat_uid else "unknown"
+                crop_name = f"crop_{name}_{ts}.jpg"
                 try:
                     cv2.imwrite(os.path.join(cam_dir, crop_name), crop)
                 except Exception:
                     pass
-
-            cat_uid, confidence = identify_cat_by_uid(emb, cat_embeddings)
 
             if cat_uid:
                 label = f"{cat_uid} ({confidence:.2f})"
