@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'cat_detail_page.dart';
 import 'notifications_page.dart';
-import 'live_camera_preview.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,15 +13,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isCameraOn = false; // 🔴 กล้องปิดเป็นค่าเริ่มต้น
-
-  @override
-  void dispose() {
-    // ✅ ปิดกล้องอัตโนมัติเมื่อออกจากหน้า Home
-    isCameraOn = false;
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -158,42 +148,7 @@ class _HomePageState extends State<HomePage> {
       // ===== Body =====
       body: Column(
         children: [
-          // ===== Live Camera Section =====
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: isCameraOn
-                      ? const LiveCameraPreview()
-                      : Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black12,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.videocam_off,
-                              size: 60,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 15),
-                ElevatedButton.icon(
-                  icon: Icon(isCameraOn ? Icons.stop : Icons.videocam),
-                  label: Text(isCameraOn ? 'Close Camera' : 'Open Camera'),
-                  onPressed: () {
-                    setState(() {
-                      isCameraOn = !isCameraOn;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
+          // Live camera removed
 
           // ===== Header =====
           const SizedBox(height: 15),
