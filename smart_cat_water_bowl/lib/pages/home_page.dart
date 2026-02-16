@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 import 'cat_detail_page.dart';
 import 'notifications_page.dart';
@@ -13,6 +14,92 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final List<StreamSubscription> _subs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _startWaterLevelListeners();
+  }
+
+  @override
+  void dispose() {
+    for (final s in _subs) {
+      s.cancel();
+    }
+    _subs.clear();
+    super.dispose();
+  }
+
+  Future<void> _startWaterLevelListeners() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      // Find devices owned by this user. Expects a `devices` collection
+      // with documents that either have `device_id` field or use doc id.
+      final devQuery = await FirebaseFirestore.instance
+          .collection('devices')
+          .where('ownerUid', isEqualTo: uid)
+          .get();
+
+      final deviceIds = <String>[];
+      for (final d in devQuery.docs) {
+        final map = d.data();
+        final idField = (map['device_id'] as String?)?.toString();
+        deviceIds.add(idField ?? d.id);
+      }
+
+      if (deviceIds.isEmpty) return;
+
+      // Firestore 'whereIn' supports up to 10 items; split into batches.
+      const batchSize = 10;
+      for (var i = 0; i < deviceIds.length; i += batchSize) {
+        final batch = deviceIds.sublist(
+          i,
+          (i + batchSize) > deviceIds.length ? deviceIds.length : i + batchSize,
+        );
+
+        final sub = FirebaseFirestore.instance
+            .collection('water_levels')
+            .where('device_id', whereIn: batch)
+            .snapshots()
+            .listen(
+              (snap) {
+                for (final change in snap.docChanges) {
+                  if (change.type == DocumentChangeType.added) {
+                    final data = change.doc.data();
+                    if (data == null) continue;
+                    final level =
+                        data['level_pct'] ?? data['level'] ?? data['levelPct'];
+                    final deviceId = data['device_id'] ?? 'device';
+
+                    final title = 'Device $deviceId: water level';
+                    final message = 'Water level ${level ?? 'unknown'}%';
+
+                    // Create a notification doc for this user.
+                    FirebaseFirestore.instance.collection('notifications').add({
+                      'ownerUid': uid,
+                      'title': title,
+                      'message': message,
+                      'seen': false,
+                      'createdAt': FieldValue.serverTimestamp(),
+                    });
+                  }
+                }
+              },
+              onError: (e) {
+                debugPrint('water_levels listener error: $e');
+              },
+            );
+
+        _subs.add(sub);
+      }
+    } catch (e) {
+      debugPrint('Failed to start water level listeners: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;

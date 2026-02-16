@@ -281,118 +281,137 @@ class _CatDetailPageState extends State<CatDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Weekly intake (mock)',
+                    'Weekly intake',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
-                  Builder(
-                    builder: (context) {
-                      final List<double> multipliers = [
-                        0.7,
-                        0.9,
-                        1.0,
-                        0.85,
-                        0.6,
-                        1.1,
-                        0.95,
-                      ];
-
-                      final List<int> values = [];
-                      if (recommendedMl != null) {
-                        for (var m in multipliers) {
-                          values.add((recommendedMl * m).round());
-                        }
-                      } else {
-                        values.addAll([150, 180, 200, 170, 140, 220, 190]);
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('sessions')
+                        .where('detected_cat_uid', isEqualTo: widget.docId)
+                        .where('status', isEqualTo: 'ready')
+                        .where(
+                          'processed_at',
+                          isGreaterThanOrEqualTo: Timestamp.fromDate(
+                            DateTime.now().subtract(const Duration(days: 6)),
+                          ),
+                        )
+                        .snapshots(),
+                    builder: (context, snap) {
+                      if (snap.hasError) {
+                        return Text('Error loading sessions: ${snap.error}');
                       }
 
-                      final maxVal = values
-                          .reduce((a, b) => a > b ? a : b)
-                          .toDouble();
+                      final docs = snap.hasData ? snap.data!.docs : [];
 
-                      final days = const [
-                        'Mon',
-                        'Tue',
-                        'Wed',
-                        'Thu',
-                        'Fri',
-                        'Sat',
-                        'Sun',
-                      ];
+                      final now = DateTime.now();
+                      final days = List<DateTime>.generate(7, (i) {
+                        return DateTime(
+                          now.year,
+                          now.month,
+                          now.day,
+                        ).subtract(Duration(days: 6 - i));
+                      });
+
+                      final dayKeys = days
+                          .map((d) => '${d.year}-${d.month}-${d.day}')
+                          .toList();
+
+                      final Map<String, double> perDayMl = {
+                        for (var k in dayKeys) k: 0.0,
+                      };
+
+                      for (final d in docs) {
+                        final map = d.data() as Map<String, dynamic>;
+
+                        DateTime? ts;
+                        final tsField = map['processed_at'];
+
+                        if (tsField is Timestamp) {
+                          ts = tsField.toDate();
+                        } else if (tsField is String) {
+                          ts = DateTime.tryParse(tsField);
+                        }
+
+                        if (ts == null) continue;
+
+                        final key = '${ts.year}-${ts.month}-${ts.day}';
+                        if (!perDayMl.containsKey(key)) continue;
+
+                        final vol = map['volume_ml'];
+                        double ml = 0;
+                        if (vol is num) ml = vol.toDouble();
+                        if (vol is String) ml = double.tryParse(vol) ?? 0;
+
+                        perDayMl[key] = perDayMl[key]! + ml;
+                      }
+
+                      final values = dayKeys
+                          .map((k) => perDayMl[k]!.round())
+                          .toList();
+
+                      final maxVal = values.isNotEmpty
+                          ? values.reduce((a, b) => a > b ? a : b).toDouble()
+                          : 1.0;
+
+                      final dayLabels = days.map((d) {
+                        const wk = [
+                          'Mon',
+                          'Tue',
+                          'Wed',
+                          'Thu',
+                          'Fri',
+                          'Sat',
+                          'Sun',
+                        ];
+                        return wk[d.weekday - 1];
+                      }).toList();
 
                       return SizedBox(
                         height: 160,
-                        child: Stack(
-                          children: [
-                            if (recommendedMl != null)
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                top: 16 + (1 - (recommendedMl / maxVal)) * 80,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        height: 1,
-                                        color: Colors.green,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: List.generate(values.length, (i) {
+                            final h = maxVal > 0
+                                ? (values[i] / maxVal) * 100.0
+                                : 0.0;
+
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 22,
+                                  height: h + 20,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                      255,
+                                      134,
+                                      195,
+                                      245,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  alignment: Alignment.topCenter,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 6.0),
+                                    child: Text(
+                                      values[i].toString(),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: List.generate(values.length, (i) {
-                                  final h = maxVal > 0
-                                      ? (values[i] / maxVal) * 100.0
-                                      : 0.0;
-
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 22,
-                                        height: h + 20,
-                                        decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                            255,
-                                            134,
-                                            195,
-                                            245,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        alignment: Alignment.topCenter,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 6.0,
-                                          ),
-                                          child: Text(
-                                            values[i].toString(),
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        days[i],
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  );
-                                }),
-                              ),
-                            ),
-                          ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  dayLabels[i],
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            );
+                          }),
                         ),
                       );
                     },
