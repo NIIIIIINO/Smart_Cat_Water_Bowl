@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(AI_DIR)
 cred_path = os.path.join(
     BASE_DIR,
     "secrets",
-    "smart-cat-water-bowl-firebase-adminsdk-fbsvc-8ae7ca925f.json"
+    "smart-cat-water-bowl-firebase-adminsdk-fbsvc-e4f2a9553e.json"
 )
 
 if not firebase_admin._apps:
