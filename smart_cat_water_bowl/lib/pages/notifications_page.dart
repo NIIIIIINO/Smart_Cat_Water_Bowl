@@ -16,12 +16,10 @@ class NotificationsPage extends StatelessWidget {
         : FirebaseFirestore.instance
               .collection('notifications')
               .where('ownerUid', isEqualTo: uid)
-              // 🔥 ตัด orderBy ออก → กัน index error
               .snapshots();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
@@ -39,7 +37,6 @@ class NotificationsPage extends StatelessWidget {
           ),
         ),
       ),
-
       body: SafeArea(
         child: uid == null
             ? const Center(child: Text('Not signed in'))
@@ -76,7 +73,6 @@ class NotificationsPage extends StatelessWidget {
                       final doc = docs[index];
                       final data = doc.data() as Map<String, dynamic>;
 
-                      // ✅ รองรับหลายชื่อ field
                       final title =
                           data['title'] ??
                           data['message'] ??
@@ -96,6 +92,16 @@ class NotificationsPage extends StatelessWidget {
                           ? ts.toDate().toLocal().toString()
                           : '';
 
+                      // ✅ เลือก icon ตาม type จาก cloud
+                      final type = data['type'];
+                      IconData icon = Icons.notifications;
+
+                      if (type == 'drink_detected') {
+                        icon = Icons.local_drink;
+                      } else if (type == 'no_drink_today') {
+                        icon = Icons.warning_amber;
+                      }
+
                       return Container(
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.92),
@@ -103,9 +109,7 @@ class NotificationsPage extends StatelessWidget {
                         ),
                         child: ListTile(
                           leading: Icon(
-                            seen
-                                ? Icons.notifications_none
-                                : Icons.notifications_active,
+                            icon,
                             color: seen ? Colors.grey : _green,
                           ),
                           title: Text(
@@ -126,9 +130,7 @@ class NotificationsPage extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-
                           onTap: () async {
-                            // ✅ safe mark seen
                             try {
                               if (!seen) {
                                 await doc.reference.update({'seen': true});
