@@ -74,8 +74,8 @@ class NotificationsPage extends StatelessWidget {
                       final data = doc.data() as Map<String, dynamic>;
 
                       final title =
-                          data['title'] ??
                           data['message'] ??
+                          data['title'] ??
                           data['text'] ??
                           'Notification';
 
@@ -144,9 +144,7 @@ class NotificationsPage extends StatelessWidget {
                               builder: (_) => AlertDialog(
                                 title: Text(title.toString()),
                                 content: Text(
-                                  message.toString().isEmpty
-                                      ? 'No details'
-                                      : message.toString(),
+                                  time.isEmpty ? 'No time info' : time,
                                 ),
                                 actions: [
                                   TextButton(
