@@ -171,27 +171,33 @@ class _InformationPageState extends State<InformationPage> {
   }
 
   Future<List<String>> _uploadImages(String catId) async {
-    final List<String> urls = [];
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return [];
 
-    if (uid == null) return urls;
+    final futures = <Future<String?>>[];
 
     for (var i = 0; i < _picked.length; i++) {
       final file = File(_picked[i].path);
 
       final ref = FirebaseStorage.instance.ref().child(
-        'cats/$uid/$catId/image_$i.jpg', // ✅ FIX
+        'cats/$uid/$catId/image_$i.jpg',
       );
 
-      final snapshot = await ref.putFile(
-        file,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
+      final future = ref
+          .putFile(file, SettableMetadata(contentType: 'image/jpeg'))
+          .then((snap) => snap.ref.getDownloadURL())
+          .catchError((e) {
+            debugPrint("❌ upload failed image_$i: $e");
+            return null; // ไม่ throw — ไม่ล่มทั้งชุด
+          });
 
-      urls.add(await snapshot.ref.getDownloadURL());
+      futures.add(future);
     }
 
-    return urls;
+    final results = await Future.wait(futures);
+
+    // เอาเฉพาะที่สำเร็จ
+    return results.whereType<String>().toList();
   }
 
   Future<String?> _uploadProfileImage(String catId) async {
