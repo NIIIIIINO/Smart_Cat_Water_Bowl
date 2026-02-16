@@ -6,14 +6,11 @@ import numpy as np
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# โหลด weights แบบใหม่ (ไม่ใช้ pretrained=True)
 weights = MobileNet_V2_Weights.IMAGENET1K_V1
-
 model = models.mobilenet_v2(weights=weights)
 model.classifier = torch.nn.Identity()
 model = model.to(device).eval()
 
-# ✅ ImageNet mean / std (fix ตายตัว ปลอดภัย)
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD  = [0.229, 0.224, 0.225]
 
@@ -21,18 +18,20 @@ transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(
-        mean=IMAGENET_MEAN,
-        std=IMAGENET_STD
-    )
+    transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
 ])
 
+
 def get_embedding(img):
-    """
-    img: RGB numpy array
-    return: 1D embedding vector
-    """
     img = transform(img).unsqueeze(0).to(device)
     with torch.no_grad():
         emb = model(img)
-    return emb.cpu().numpy().flatten()
+
+    v = emb.cpu().numpy().flatten()
+
+    # ✅ normalize for cosine similarity
+    norm = np.linalg.norm(v)
+    if norm > 0:
+        v = v / norm
+
+    return v
